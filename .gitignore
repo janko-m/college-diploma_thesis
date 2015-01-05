@@ -1,0 +1,10 @@
+Taming Text.epub
+features.md
+
+# Temporary files
+*.pdf
+*.aux
+*.log
+*.toc
+*.out
+*.lof

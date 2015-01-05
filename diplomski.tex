@@ -1,0 +1,114 @@
+\documentclass[11pt]{scrreprt}
+
+% Croatian support
+\usepackage[croatian]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+
+% Turn links into hyperlinks
+\usepackage{hyperref}
+% Turn URLs into hyperlinks
+\usepackage{url}
+
+% Include Bibliography in table of contents
+\usepackage[nottoc,numbib]{tocbibind}
+
+\title{Računalna obrada teksta}
+\author{Janko Marohnić}
+
+\begin{document}
+
+\maketitle
+
+\pagenumbering{roman}
+
+\tableofcontents
+
+\pagebreak
+
+\pagenumbering{arabic}
+
+\chapter{Uvod}
+
+\chapter{Metode i tehnike obrade teksta}
+
+\section{Tokenizacija}
+
+\subsection{Pretvaranje velikih slova u mala}
+
+\subsection{Eliminacija stop-riječi}
+
+\subsection{Dodavanje sinonima i proširivanje akronima}
+
+\subsection{Pridruživanje vrsta riječi}
+
+\subsection{Odstranjivanje akcenata}
+
+\section{Stemming}
+
+\section{Detekcija rečenica}
+
+\section{Modeliranje niza}
+
+\chapter{Pretraživanje}
+
+\section{Indeksiranje}
+
+\subsection{Preprocesiranje}
+
+\section{Upiti}
+
+\begin{itemize}
+  \item{Ključne riječi}
+  \item{Pretraživanje po određenim poljima}
+\end{itemize}
+
+\subsection{Kategorizacija}
+
+\subsection{Fraze}
+
+\subsection{Bulovski operatori}
+
+\subsection{"Fuzzy" pretraga}
+
+\subsection{"Wildcard" pretraga}
+
+\subsection{Regularni izrazi}
+
+\subsection{Ispravljanje zatipaka}
+
+\section{Rangiranje}
+
+\subsection{Model vektorskog polja}
+
+\subsection{Težine riječi}
+
+\begin{itemize}
+  \item Vrste riječi
+  \item TF-IDF
+\end{itemize}
+
+\subsection{Težine dijelova dokumenata}
+
+\chapter{Implementacija}
+
+\section{Softveri}
+
+\subsection{PostgreSQL}
+
+\subsection{Sphinx}
+
+\subsection{Apache Solr}
+
+\subsection{ElasticSearch}
+
+\section{Aplikacija}
+
+\chapter{Rezultati}
+
+\begin{thebibliography}{99}
+  \bibitem{taming} Taming Text: How to Find, Organize, and Manipulate It
+  \bibitem{elasticsearch} \url{http://www.elasticsearch.org/guide/en/elasticsearch/guide/current/index.html}
+\end{thebibliography}
+
+\end{document}
