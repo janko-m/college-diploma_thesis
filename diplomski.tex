@@ -1,19 +1,22 @@
 \documentclass[11pt]{scrreprt}
 
-% Croatian support
+% Podrška za hrvatski
 \usepackage[croatian]{babel}
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 
-% Turn links into hyperlinks
+% Veći razmak između paragrafa
+\setlength{\parskip}{\bigskipamount}
+
+% Pretvori linkove u hyperlinkove
 \usepackage{hyperref}
-% Turn URLs into hyperlinks
+% Pretvori URLove u hyperlinkove
 \usepackage{url}
 
-% Include Bibliography in table of contents
+% Uključi bibliografiju u sadržaj
 \usepackage[nottoc,numbib]{tocbibind}
 
-\title{Računalna obrada teksta}
+\title{Pretraživanje}
 \author{Janko Marohnić}
 
 \begin{document}
@@ -30,25 +33,109 @@
 
 \chapter{Uvod}
 
-\chapter{Metode i tehnike obrade teksta}
+\chapter{Analiza i obrada teksta}
+
+Implementacija kvalitetne tražilice zahtijeva mnogobrojne postupke obrade tekstualnog sadržaja dokumenata koji se pretražuju.
 
 \section{Tokenizacija}
 
-\subsection{Pretvaranje velikih slova u mala}
+Pretraživanje dokumenata svodi se na ispitivanje u kojim se dokumentima pojavljuju ključne riječi unešene u polje za pretraživanje. Dokument se stoga rastavlja na "riječi", tzv \textit{tokene}, tako da se onda pretraživanje dokumenata može ugrubo svesti na traženje tokena koji odgovaraju ključnim riječima.
+
+Pretpostavimo da trebamo tokenizirati sljedeći tekst:
+
+\begin{quote}
+  \textit{Sve današnje skijaške discipline nastale su 1900-1950. godine.}
+\end{quote}
+
+Budući da su riječi odvojene razmacima, promotrimo (naivni) tokenizator \textit{A} koji rastavlja tokene po razmacima:
+
+\begin{center}
+  \begin{tabular}{cccccccc}
+    Sve & današnje & skijaške & discipline & nastale & su & 1900-1950. & godine.
+  \end{tabular}
+\end{center}
+
+Dok ovaj pristup funkcionira u nekim slučajevima, primjetimo da se kod našeg teksta na zadnji token nalijepila točka, što ne želimo. Promotrimo sada tokenizator \textit{B} koji odstranjuje interpunkcijske znakove:
+
+\begin{center}
+  \begin{tabular}{cccccccc}
+    Sve & današnje & skijaške & discipline & nastale & su & 1900-1950 & godine
+  \end{tabular}
+\end{center}
+
+Dok ovaj tokenizator riješava problem lijepljenja interpunkcijskih znakova za tokene, činjenica da su odstranjeni svi interpunkcijski znakovi stvara novi problem. Pretpostavimo da korisnik pretražuje sve dokumente gdje se pojavljuje fraza "pobjednik Ivica Kostelić", i naiđe na sljedeći tekst:
+
+\begin{quote}
+  \textit{Prvo mjesto svjetskog skijaškog kupa odnosi novi pobjednik. Ivica Kostelić, nažalost, osvojio je 25. mjesto u prvoj vožnji i nosi porazno zadnje mjesto.}
+\end{quote}
+
+Ukoliko gledamo strogo koji tokeni se pojavljuju zajedno, fraza "pobjednik Ivica Kostelić" bi bila pronađena u ovom tesktu. Ali mi znamo da to ne bi trebalo biti tako, zbog točke nakon "pobjednik". Promotrimo zato tokenizator \textit{C} koji odvaja tokene po vrsti znaka: slovo, broj, interpunkcija itd:
+
+\begin{center}
+  \begin{tabular}{cccccccccccc}
+    Sve & današnje & skijaške & discipline & nastale & su & 1900 & - & 1950 & . & godine & .
+  \end{tabular}
+\end{center}
+
+Ovdje sve izgleda dobro, riječi su pravilno odvojene, i očuvani su interpunkcijski znakovi. Ovaj pristup također sadrži bonus jer sada korisnik može upisati ključnu riječ "1900" u polje za pretraživanje, i pretraga će pronaći ovaj tekst.
+
+\subsection{Normalizacija veličine slova}
+
+U većini aplikacija korisnicima nije važno da dokumenti koje pokušavaju naći sadrže unešene ključne riječi točno te veličine. Na primjer, za ključnu riječ "jabuka" bilo bi logično da bi rezultat pretraživanja također trebao uključivati i dokument koji sadrži riječ "Jabuka". Štoviše, kada bi se veličina slova uzimala u obzir, ako bi korisnik htio naći sve dokumente koji sadrže riječ "jabuka" bilo na početku ili na kraju rečenice, morao bi proširiti popis ključnih riječi u "jabuka Jabuka".
+
+Iz tih razloga se svim tokenima po konvenciji\footnote{Nije bitno koje su veličine slova, važno je samo da su sva iste veličine} velika slova pretvaraju u mala, da se normalizira veličina.
 
 \subsection{Eliminacija stop-riječi}
 
-\subsection{Dodavanje sinonima i proširivanje akronima}
+Stop-riječi su česte riječi poput "i", "ako" i "onda"\footnote{U hrvatskom jeziku možemo sve veznike i prijedloge smatrati stop-riječima} koje najčešće nemaju vrijednost za aplikaciju. Iz tog razloga se one mogu izbaciti iz liste tokena, da bi se omogućilo brže pretraživanje.
+
+\subsection{Dodavanje sinonima}
+
+Kada korisnik upiše ključnu riječ "pećina" u polje za pretraživanje, on bi najčešće htio u rezultatima dobiti i dokumente koji sadrže riječ "špilja". Iz tog razloga je korisno u listu tokena još dodati i sve sinonime tih tokena.
 
 \subsection{Pridruživanje vrsta riječi}
 
-\subsection{Odstranjivanje akcenata}
+Često je korisno nekim vrstama riječi dati veću "težinu" od drugih. Na primjer, ako su dane ključne riječi "lijepa priroda", imalo bi smisla da "priroda" ima veću težinu od "lijepa". Konkretno, da se dokument u kojem se pojavljuje riječ "priroda" rangira više nego dokument koji sadrži riječ "lijepa". Općenito ima smisla dati veću težinu imenicama nego pridjevima. Da se to omogući, svim tokenima se pridružuje i njihova vrsta riječi.
+
+\subsection{Normalizacija specijalnih znakova}
+
+Hrvatski jezik ima 5 specijalnih znakova: "ć", "č", "ž", "š" i "đ". Dobro je omogućiti korisnicima koji ili ne koriste hrvatsku tipkovnicu, ili su stranci koji nemaju puno iskustva u hrvatskom jeziku, da mogu pretraživati hrvatske tekstove s pojednostavljenim verzijama specijalnih znakova:
+
+\begin{center}
+  \begin{tabular}{ccccc}
+    ć            & č            & ž            & š            & đ            \\
+    $\downarrow$ & $\downarrow$ & $\downarrow$ & $\downarrow$ & $\downarrow$ \\
+    c            & c            & z            & s            & d            \\
+  \end{tabular}
+\end{center}
+
+U tu svrhu se mogu svi specijalni znakovi u tokenima zamijeniti s njihovim pojednostavljenim verzijama.
 
 \section{Stemming}
 
-\section{Detekcija rečenica}
+Pretpostavimo da korisnik želi naći sve dokumente vezane uz banke. Budući da ne zna u kojem obliku i padežu se pojavljuje ta riječ, korisnik bi morao upisivati u tražilicu "banka banke banci ... banke bankama ... bankarstvo bankarstva ...". Ovakvo korisničko iskustvo očito nije prihvatljivo; korisnik bi trebao samo upisati riječ "banka", i trebale bi se automatski pretražiti sve varijacije te riječi.
 
-\section{Modeliranje niza}
+\textit{Stemming} je proces reduciranja riječi na njen korijen, ili jednostavniji oblik, koji sam po sebi ne mora biti riječ (\cite{taming} str. 25). Stemming omogućuje korisniku da upiše jednu riječ, i dobije natrag sve dokumente koji sadrže bilo koju varijaciju te riječi.
+
+Postoje razni stupnji stemminga; neke su agresivnije, reducirajući riječi na najmanji mogući korijen, dok su druge blaže, preferirajući samo osnovnije promjene kao odstranjivanje nastavaka broja i padeža. Svaka aplikacija odabire svoj stupanj stemminga, birajući omjer između kvalitete i kvantitete. Agresivniji stemming uglavnom vode ka više rezultata ali manjoj kvaliteti, dok blaži stemming može očuvati razinu kvalitete ali uz rizik da neće biti vraćeni neki korisni rezultati. Stemming može uzrokovati probleme gdje se riječi s drukčijim značenjem reduciraju na isti korijen, ili riječi koje su povezane ne reduciraju na isti korijen (\cite{taming} str.26).
+
+Aplikacije mogu najprije početi sa blažim stemmerom, pa ga napraviti agresivnijim ukoliko se primjeti da se često vraća premalo rezultata. Za najraširenije jezike postoje gotovi besplatni online stemmeri, mogu se pronaći na \url{http://snowball.tartarus.org}.
+
+\section{\textit{n}-grami}
+
+Do sada smo uglavnom obrađivali tekst na osnovu nekih lingvističkih značajki. Promotrimo sada analizu na razini nizova znakova i riječi. Neka imamo neki niz elemenata. \textit{n-gram} je bilo koji \textit{n}-člani podniz uzastopnih elemenata toga niza. Pokažimo primjer nekih \textit{n}-grama iz rečenice: "\textit{Sve današnje skijaške discipline nastale su 1900-1950. godine}":
+
+\begin{center}
+  \begin{tabular}{rl}
+    \textbf{Unigrams} & "Sve", "skijaške", "godine"                         \\
+    \textbf{Bigrams}  & "Sve,današnje", "skijaške,discipline", "nastale,su" \\
+    \textbf{Trigrams} & "Sve,današnje,skijaške", "nastale,su,1900-1950"     \\
+    \textbf{4-grams}  & "današnje,skijaške,discipline,nastale"              \\
+    \textbf{5-grams}  & "discipline,nastale,su,1900-1950,godine"            \\
+  \end{tabular}
+\end{center}
+
+\textit{n}-grami se koriste za promatranje konteksta oko riječi ili slova. Primjerice, \textit{n}-grami na razini riječi koriste se za nalaženje fraza, što se radi tako da se gledaju \textit{n}-grami gdje je \textit{n} manji od duljine fraze, čime se dobiva vjerojatnost da se negdje nalazi fraza, što ubrzava pretraživanje. S druge strane, \textit{n}-grami na razini slova su vrlo korisni pri ispravljanju zatipaka u unosu korisnika, što se radi tako da se gleda broj zajedničkih trigrama dviju riječi, što ispada dobra mjera za sličnost.
 
 \chapter{Pretraživanje}
 
