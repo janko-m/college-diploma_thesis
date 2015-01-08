@@ -34,6 +34,7 @@
 \chapter{Uvod}
 
 \chapter{Analiza i obrada teksta}
+\label{ch:processing}
 
 Implementacija kvalitetne tražilice zahtijeva mnogobrojne postupke obrade tekstualnog sadržaja dokumenata koji se pretražuju.
 
@@ -79,25 +80,25 @@ Ukoliko gledamo strogo koji tokeni se pojavljuju zajedno, fraza "pobjednik Ivica
 
 Ovdje sve izgleda dobro, riječi su pravilno odvojene, i očuvani su interpunkcijski znakovi. Ovaj pristup također sadrži bonus jer sada korisnik može upisati ključnu riječ "1900" u polje za pretraživanje, i pretraga će pronaći ovaj tekst.
 
-\subsection{Normalizacija veličine slova}
+\section{Normalizacija veličine slova}
 
 U većini aplikacija korisnicima nije važno da dokumenti koje pokušavaju naći sadrže unešene ključne riječi točno te veličine. Na primjer, za ključnu riječ "jabuka" bilo bi logično da bi rezultat pretraživanja također trebao uključivati i dokument koji sadrži riječ "Jabuka". Štoviše, kada bi se veličina slova uzimala u obzir, ako bi korisnik htio naći sve dokumente koji sadrže riječ "jabuka" bilo na početku ili na kraju rečenice, morao bi proširiti popis ključnih riječi u "jabuka Jabuka".
 
 Iz tih razloga se svim tokenima po konvenciji\footnote{Nije bitno koje su veličine slova, važno je samo da su sva iste veličine} velika slova pretvaraju u mala, da se normalizira veličina.
 
-\subsection{Eliminacija stop-riječi}
+\section{Eliminacija stop-riječi}
 
 Stop-riječi su česte riječi poput "i", "ako" i "onda"\footnote{U hrvatskom jeziku možemo sve veznike i prijedloge smatrati stop-riječima} koje najčešće nemaju vrijednost za aplikaciju. Iz tog razloga se one mogu izbaciti iz liste tokena, da bi se omogućilo brže pretraživanje.
 
-\subsection{Dodavanje sinonima}
+\section{Dodavanje sinonima}
 
 Kada korisnik upiše ključnu riječ "pećina" u polje za pretraživanje, on bi najčešće htio u rezultatima dobiti i dokumente koji sadrže riječ "špilja". Iz tog razloga je korisno u listu tokena još dodati i sve sinonime tih tokena.
 
-\subsection{Pridruživanje vrsta riječi}
+\section{Pridruživanje vrsta riječi}
 
 Često je korisno nekim vrstama riječi dati veću "težinu" od drugih. Na primjer, ako su dane ključne riječi "lijepa priroda", imalo bi smisla da "priroda" ima veću težinu od "lijepa". Konkretno, da se dokument u kojem se pojavljuje riječ "priroda" rangira više nego dokument koji sadrži riječ "lijepa". Općenito ima smisla dati veću težinu imenicama nego pridjevima. Da se to omogući, svim tokenima se pridružuje i njihova vrsta riječi.
 
-\subsection{Normalizacija specijalnih znakova}
+\section{Normalizacija specijalnih znakova}
 
 Hrvatski jezik ima 5 specijalnih znakova: "ć", "č", "ž", "š" i "đ". Dobro je omogućiti korisnicima koji ili ne koriste hrvatsku tipkovnicu, ili su stranci koji nemaju puno iskustva u hrvatskom jeziku, da mogu pretraživati hrvatske tekstove s pojednostavljenim verzijama specijalnih znakova:
 
@@ -139,11 +140,53 @@ Do sada smo uglavnom obrađivali tekst na osnovu nekih lingvističkih značajki.
 
 \chapter{Pretraživanje}
 
+Pretraživanje se može opisati u četiri dijela:
+
+\begin{enumerate}
+  \item \textbf{Indeksiranje} – Datoteke i baze podataka se obrađuju da se mogu pretraživati.
+  \item \textbf{Upit} – Korisnik upisuje ključne riječi kroz neko korisničko sučelje.
+  \item \textbf{Rangiranje} – Tražilica uspoređuje upit s dokumentima u indeksu i rangira ih po tome koliko odgovaraju upitu.
+  \item \textbf{Prikaz rezultata} – Konačni rezultati se prikazuju kroz korisnički sučelje.
+\end{enumerate}
+
+Indeksiranje, upit i rangiranje ćemo obraditi u sljedećim sekcijama, dok ćemo prikaz rezultata izostaviti, jer je to problem isključivo dizajnerske prirode.
+
 \section{Indeksiranje}
+
+Prije nego korisnik napravi bilo kakav upit, tražilica treba "poznavati" sadržaj koji pretražuje. Na primjer, ako dokumenti koji se pretražuju imaju naslov, i mi znamo da je taj naslov puno informativniji od tijela dokumenta, možemo informirati tražilicu da da veću težinu dokumentima kojima je upit pogodio naslov, time ih rangirajući više u rezultatima.
+
+Nakon što se postiglo određeno razumijevanje dokumenata koji se pretražuju, proces obrade tih dokumenata za pretraživanje, zvan \textit{indeksiranje}, može početi. Ta obrada dokumenata sastoji se od rastavljanja na tokene, i eventualne modifikacije svakog tokena koje kreiraju normalizirane tokene, zvane \textit{termima}. Te modifikacije za dobijanje termova mogu uključivati jednu ili više obrada iz poglavlja \ref{ch:processing}.
+
+Nakon što su termovi izvađeni iz dokumenata, obično se spremaju u strukturu zvanu \textit{invertirani indeks}, koja je optimizirana za brzo pronalaženje dokumenata koji sadrže određen term. Većina postojećih tražilica uz inveritrani indeks još sprema i poziciju svakog terma unutar dokumenta, što omogućuje značajke kao pretraživanje po frazama.
+
+TODO: Slika invertiranog indeksa
+
+Uz pohranjivanje veza između termova i dokumenata, indeksiranje često izračunava i sprema informaciju o važnosti termova u odnosu na ostale termove u dokumentu. Ta informacija igra veliku ulogu u sposobnosti tražilice da rangira dokumente po relevantnosti.
+
+Općenito prednost navedenih obrada dokumenata i izračunavanja što više informacija unaprijed omogućava tražilici da na upit može brzo pronaći i rangirati dokumente.
 
 \subsection{Preprocesiranje}
 
-\section{Upiti}
+Pretpostavimo da radimo aplikaciju koja omogućuje pohranjivanje digitalnih prezentacija, koje se učitavaju u PDF formatu, i koje se onda mogu gledati online\footnote{Jedna takva aplikacija je \url{http://speakerdeck.com}.}. Htjeli bismo omogućiti da korisnici mogu pretraživati bazu svih prezentacija po ključnim riječima. Problem je što PDF datoteke nisu tekstualne naravi, pa ne možemo samo pretraživati sadržaj datoteke. Ono što trebamo jest najprije svesti PDF na format pogodan za pretraživanje, pri indeksiranju. Taj proces pretvaranja više vrsta datoteka u jednu zajedničku tekstualnu reprezentaciju zove se \textit{preprocesiranje} (\cite{taming} str. 32).
+
+Neki od najčešćih formata datoteki su:
+
+\begin{center}
+  \begin{tabular}{ll}
+    \textbf{Format}                            & \textbf{Esktenzija} \\
+    Tekst                                      & .txt                \\
+    Microsoft Office (Word, PowerPoint, Excel) & .doc,.ppt,.xls      \\
+    Adobe Portable Document Format (PDF)       & .pdf                \\
+    Rich Text Format (RTF)                     & .rtf                \\
+    HTML                                       & .html               \\
+    E-mail                                     & N/A                 \\
+    Baze podataka                              & N/A                 \\
+  \end{tabular}
+\end{center}
+
+Jedan popularan softver otvorenog koda za izdvajanje teksta iz različitih tipova datoteki je Apache Tika\footnote{\url{http://tika.apache.org}}.
+
+\section{Upit}
 
 \begin{itemize}
   \item{Ključne riječi}
@@ -158,9 +201,7 @@ Do sada smo uglavnom obrađivali tekst na osnovu nekih lingvističkih značajki.
 
 \subsection{"Fuzzy" pretraga}
 
-\subsection{"Wildcard" pretraga}
-
-\subsection{Regularni izrazi}
+\subsection{"Wildcards" i Regularni izrazi}
 
 \subsection{Ispravljanje zatipaka}
 
