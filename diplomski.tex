@@ -38,7 +38,7 @@
 % Promjeni defaultni folder za slike
 \graphicspath{{./images/}}
 
-\title{Pretraživanje}
+\title{Računalna obrada teksta}
 \author{Janko Marohnić}
 \advisor{Prof. dr. sc. Robert Manger}
 \date{Travanj, 2015.}
@@ -51,12 +51,21 @@
 
 \chapter{Uvod}
 
-* Quality vs quantity
-  - Prouči kako se točno dobiva quality, i što se možda treba žrtvovati
-* Uvedi pojam ``dokumenta''
-* Ako korisnik ne može naći dokument, on ``ne postoji''
-* Bavimo se isključivo softverima otvorenog koda
-* Pojam tražilice (i aplikacije)
+Kada se informacije premjeste iz fizičkih knjiga u digitalni format, moguće ih je puno bolje ``upoznati'' i lakše pretraživati uporabom računala. Kroz godine su razvijene razne metode i tehnike obrade teksta koje su esencijalne za organizaciju digitalnih informacija. U nastavku ćemo jednu sadržajnu cjelinu informacija (knjiga, članak itd) zvati samo \textit{dokument}.
+
+Postoje razne korisne značajke koje se mogu postići obradom teksta. Primjerice, moguće je grupirati nasumičnu kolekciju dokumenata po sličnosti (eng. \textit{clustering}), te korisniku koji čita jedan dokument ponuditi druge, sadržajno \textit{povezane} dokumente. Moguće je iz dokumenata izvaditi najbitnije pojmove, i tako saznati koja je glavna tema dokumenta. I naravno, moguće je pretraživati sve dokumente po nekom upitu, što je nedvojbeno navažnija značajka i biti će tema ovog rada.
+
+Pretraživanje najčešće nije samo "korisna značajka"; u većini aplikacija je broj dokumenata vrlo velik, te ako korisnik ne može pronaći neki dokument, on efektivno ne postoji. U aplikacijama koje prodaju artikle to znači da, ako korisnik ne može pronaći artikl, ne može ga niti kupiti. Za aplikacije kao \textit{Google} to može značiti da korisnik ne može posjetiti neku web stranicu za koju zna da postoji. Dakle, kvalitetno pretraživanje je velikom broju aplikacija nužno za njihovu egzistenciju. U nastavku ćemo softverski program koji vrši pretraživanje zvati jednostavno \textit{tražilica}.
+
+Kvalitetna tražilica ide puno dalje od jednostavnog uspoređivanja niza znakova. Tražilica treba moći prepoznati važne dijelove upita, i vratiti dokumente u kojima se ti elementi spominju. Ona treba moći predvidjeti što je korisnik htio pretražiti, tako da pretražuje i sinonime riječi iz upita, i tolerira eventualne zatipke i nedovršene riječi. Konačno dobra tražilica treba u razumnoj brzini korisniku vratiti rezultate pretraživanja i rangirati ih. U sljedećem poglavlju obraditi ćemo glavne značajke koje današnje tražilice trebaju imati.
+
+Aplikacija, da može pružiti svojim korisnicima mogućnost pretraživanja, može izabrati ili sama implementirati svoju tražilicu, ili koristiti jedan od već postojećih softvera. Budući da danas postoje vrlo kvalitetne tražilice otvorenog koda, nema razloga ne odlučiti se za potonje. U radu ću spomenuti i obraditi sve vodeće softvere za pretraživanjeotvorenog koda. Tražilice otvorenog koda su se naime pokazale da izvrsno funkcioniraju i za vrlo popularne aplikacije.
+
+Za praktični dio rada ću izraditi web aplikaciju u kojoj ću implementirati pretraživanje sa što je moguće više značajki obrađenih u radu. Bazu podataka ću preuzeti iz web stranice Hrvatske znanstvene bibliografije (\url{bib.irb.hr}). Implementirat ću isto pretraživanje sa svakim softverom spomenutim u radu, i uspoređivat ću brzinu pretraživanja i jednostavnost održavanja svake tražilice.
+
+\chapter{Pretraživanje}
+
+% TODO Quality vs quantity
 
 Pretraživanje se može opisati u četiri dijela:
 
@@ -67,16 +76,16 @@ Pretraživanje se može opisati u četiri dijela:
   \item \textbf{Prikaz rezultata} – Konačni rezultati se prikazuju u korisničkom sučelju.
 \end{compactenum}
 
-\textit{Indeksiranje}, \textit{upit} i \textit{rangiranje} obradit ćemo u sljedećim poglavljima, dok ćemo \textit{prikaz rezultata} izostaviti, jer je to problem isključivo dizajnerske prirode.
+\textit{Indeksiranje}, \textit{upit} i \textit{rangiranje} obradit ćemo u sljedećim poglavljima, dok ćemo \textit{prikaz rezultata} izostaviti, jer je to problem isključivo prezentacijske prirode.
 
-\chapter{Indeksiranje}
+\section{Indeksiranje}
 \label{indexing}
 
 Prije nego korisnik napravi bilo kakav upit, tražilica treba ``poznavati'' sadržaj koji pretražuje. Na primjer, ako dokumenti koji se pretražuju imaju naslov, i mi znamo da je taj naslov puno informativniji od tijela dokumenta, možemo informirati tražilicu da da veću težinu dokumentima kojima je dio upita pronađen u naslovu, time ih rangirajući više u rezultatima.
 
 Nakon što se postiglo određeno razumijevanje dokumenata koji se pretražuju, proces obrade tih dokumenata za pretraživanje, zvan \textit{indeksiranje}, može početi, i opisan je u sljedećim sekcijama. Indeksiranje se vrši prije bilo kojeg upita, zato da onda pri samom upitu tražilica može brzo pronaći i rangirati dokumente.
 
-\section{Preprocesiranje}
+\subsection{Preprocesiranje}
 
 Prije samog obrađivanja, potrebno je sve dokumente svesti na jednu zajedničku tekstualnu reprezentaciju. Pretpostavimo da radimo aplikaciju koja omogućuje pohranjivanje digitalnih prezentacija, koje se učitavaju u PDF formatu, i koje se onda mogu gledati online\footnote{Jedna takva aplikacija je \url{http://speakerdeck.com}.}. Htjeli bismo omogućiti da korisnici mogu pretraživati bazu svih prezentacija po ključnim riječima. Problem je što je PDF tzv \textit{binarni} format, pa nije moguće samo pretraživati sadržaj datoteke. Stoga je potrebno danu PDF datoteku najprije svesti na neki format koje je pogodan za pretraživanje. Taj proces pretvaranja više vrsta datoteka u jednu zajedničku tekstualnu reprezentaciju zove se \textit{preprocesiranje}\footnote{\cite{taming} str. 32}.
 
@@ -111,7 +120,7 @@ Neki od češćih formata datoteki mogu se vidjeti na slici \ref{formats}.
 
 Jedan popularan softver otvorenog koda za izdvajanje teksta iz različitih tipova datoteki je Apache Tika\footnote{\url{http://tika.apache.org}}.
 
-\section{Tokenizacija}
+\subsection{Tokenizacija}
 
 Pretraživanje dokumenata svodi se na ispitivanje u kojim se dokumentima pojavljuju ključne riječi unešene u polje za pretraživanje. Svaki dokument se stoga rastavlja na ``riječi'', tzv \textit{tokene}, tako da se onda pretraživanje dokumenata može ugrubo svesti na traženje ključnih riječi u listi tokena.
 
@@ -153,19 +162,19 @@ Ukoliko gledamo strogo koji tokeni se pojavljuju zajedno, fraza ``pobjednik Ivic
 
 Ovdje sve izgleda dobro, riječi su pravilno odvojene, i očuvani su interpunkcijski znakovi. Ovaj pristup također sadrži dodatnu značajku da sada korisnik može upisati ključnu riječ ``1900'' u polje za pretraživanje, i pretraga će pronaći ovaj tekst.
 
-\section{Normalizacija veličine slova}
+\subsection{Normalizacija veličine slova}
 
 U većini aplikacija korisnicima nije važno da dokumenti koje pokušavaju naći sadrže unešene ključne riječi točno jednake veličine. Na primjer, za ključnu riječ ``jabuka'' bi u većini slučajeva imalo smisla da rezultat pretraživanja također uključuje i dokumente koji sadrže riječ ``Jabuka''. Štoviše, kada bi se veličina slova uzimala u obzir, ako bi korisnik htio naći sve dokumente koji sadrže riječ ``jabuka'' bilo na početku ili na kraju rečenice, morao bi proširiti upit na ``jabuka Jabuka''.
 
 Zato se najčešće svim tokenima po konvenciji\footnote{Nije bitno koje su veličine slova, važno je samo da su sva iste veličine} velika slova pretvaraju u mala, čime se efektivno normalizira veličina slova.
 
-\section{Eliminacija stop-riječi}
+\subsection{Eliminacija stop-riječi}
 
 \textit{Stop}-riječi su česte riječi poput ``i'', ``ako'' i ``onda''\footnote{U hrvatskom jeziku možemo sve veznike i prijedloge smatrati stop-riječima} koje najčešće nemaju vrijednost za aplikaciju. Na primjer, ako korisnik unese upit ``jabuke i kruške'', a ne postoji niti jedan dokument u bazi podataka koji sadrži riječ ``kruška'' ili ``jabuka'', najčešće ne bi imalo smisla da tražilica onda vrati sve dokumente koji sadrže riječ ``i''.
 
 Iz tog razloga se stop-riječi često izbacuju iz liste tokena. To rezultira i bržim pretraživanjem, jer sada tražilica ima manji broj tokena koje mora pretraživati.
 
-\section{Normalizacija dijakritičkih znakova}
+\subsection{Normalizacija dijakritičkih znakova}
 
 Hrvatski jezik ima 5 dijakritičkih znakova: \textit{ć}, \textit{č}, \textit{ž}, \textit{š} i \textit{đ}. Međutim, postoje osobe koje ili ne koriste hrvatsku tipkovnicu, ili su stranci koji nemaju puno iskustva u hrvatskom jeziku te možda ne znaju pravilno koristiti dijakritičke znakove. Iz tog razloga se često svi dijakritički znakovi u tokenima zamjenjuju sa njihovim pojednostavljenim verzijama:
 
@@ -179,7 +188,7 @@ Hrvatski jezik ima 5 dijakritičkih znakova: \textit{ć}, \textit{č}, \textit{�
 
 S tom promjenom korisnici mogu koristiti pojednostavljene verzije riječi u svom upitu, i originalne riječi će još uvijek biti pronađene.
 
-\section{Korjenovanje}
+\subsection{Korjenovanje}
 
 Pretpostavimo da korisnik želi naći sve dokumente vezane uz banke. Budući da ne zna u kojem obliku i padežu se pojavljuje ta riječ, korisnik bi morao upisivati u tražilicu ``banka banke banci ... banke bankama ... bankarstvo bankarstva ...''. Ovakvo korisničko iskustvo očito nije prihvatljivo; korisnik bi trebao samo upisati riječ ``banka'', i time pretražiti sve varijacije te riječi.
 
@@ -189,7 +198,7 @@ Postoje razni stupnjevi korjenovanja; neki su agresivniji, reducirajući riječi
 
 Aplikacije mogu najprije početi sa blažim korjenovanjem, pa ga napraviti agresivnijim ukoliko se primjeti da je često vraćeno premalo rezultata. Za najraširenije jezike postoje gotovi besplatni online korjenovatelji (eng. \textit{stemmers}), mogu se pronaći na \url{http://snowball.tartarus.org}.
 
-\section{Spremanje tokena}
+\subsection{Spremanje tokena}
 
 Nakon što se svi dokumenti tokeniziraju, i ti tokeni normaliziraju obradama navedenim u prethodnim sekcijama, novonastali \textit{termi} (normalizirani tokeni) spremaju se na disk. Konkretno, spremaju se u strukturu zvanu \textit{invertirani indeks} (slika \ref{inverted_index}), koja je optimizirana za brzo pronalaženje dokumenata koji sadrže određen term. Većina postojećih tražilica uz inveritrani indeks još sprema i poziciju svakog terma unutar dokumenta, što omogućuje značajke kao pretraživanje po frazama.
 
@@ -202,13 +211,13 @@ Nakon što se svi dokumenti tokeniziraju, i ti tokeni normaliziraju obradama nav
 
 Uz pohranjivanje veza između termova i dokumenata, indeksiranje često uključuje i izračunavanje i spremanje informacija o važnosti termova u odnosu na ostale termove u dokumentu, što je detaljnije objašnjeno u \ref{tfidf}. Ta informacija igra veliku ulogu u omogućavanju tražilice da rangira dokumente po relevantnosti.
 
-\chapter{Upit}
+\section{Upit}
 
 Nakon indeksiranja tražilica je spremna za upit. Da bi napravio upit, korisnik komunicira kroz neku vrstu korisničkog sučelja, koje prima jedan (``jednostavno pretraživanje'') ili više (``napredno pretraživanje'') upita i vraća odgovarajuću listu dokumenata.
 
 Prije nego tražilica počne pretraživati indeks, sam tekst upita obično prolazi isti postupak obrade kao i dokumenti kada se indeksiraju. Primjerice, ako su tokeni korjenovani u indeksu, onda bi i tokeni iz upita također trebali biti korjenovani. U sljedećim sekcijama ćemo navesti dodatne obrade koje tražilica izvršava na samom upitu.
 
-\section{Ključne riječi}
+\subsection{Ključne riječi}
 
 Najosnovniji oblik upita je jednostavno nizanje ključnih riječi odvojenih razmakom (slika \ref{keywords}). Tražilice su obično konfigurirane tako da rezultat takvog upita vrati isključivo dokumente u kojem se nalaze \textit{sve} ključne riječi, da rezultati budu što kvalitetniji. Međutim, ukoliko sama baza aplikacije sadržava vrlo mali broj dokumenata, korisnije je žrtvovati dio kvalitete za kvantitetu, i vratiti sve dokumente koji sadržavaju \textit{bilo koju} od unesenih ključnih riječi.
 
@@ -219,7 +228,7 @@ Najosnovniji oblik upita je jednostavno nizanje ključnih riječi odvojenih razm
   \label{keywords}
 \end{figure}
 
-\section{Fraze}
+\subsection{Fraze}
 
 Pretpostavimo da radimo aplikaciju koja omogućuje korisnicima da gledaju riječi pjesama. Pretpostavimo sada da korisnik želi iskoristiti tu aplikaciju da pronađe naziv i autora pjesme na temelju fraza koje je zapamtio iz slušanja te pjesme. Ako korisnik upiše te fraze iz pjesme kao običan niz ključnih riječi, postoji vjerojatnost da će rezultati uključivati i druge pjesme koje sadrže te ključne riječi, i možda pjesma koju korisnik traži neće biti na prvom mjestu. S druge strane, kada bi korisnik mogao reći tražilici da se određeni nizovi riječi iz upita nalaze u dokumentima točno tim redoslijedom, broj vraćenih pjesama se može znatno smanjiti (jer je puno manja vjerojatnost da dvije pjesme dijele čitavu frazu nego par individualnih riječi), i puno je vjerojatnije da će tražena pjesma biti prvi rezultat.
 
@@ -232,7 +241,7 @@ Niz ključnih riječi može se označiti kao fraza tako da se omeđi dvostrukim 
   \label{phrases}
 \end{figure}
 
-\section{Booleovi operatori}
+\subsection{Booleovi operatori}
 
 Ranije smo spomenuli da za upit ključnim riječima većina tražilica vraća isključivo dokumente koji sadrže \textit{sve} unešene ključne riječi. Međutim, ako primjerice korisnik koristi online dućan mobilnih telefona, i želi pretražiti sve modele Samsunga i iPhonea, tražilica bi trebala omogućiti korisniku da potraži sve dokumente koji sadrže riječ ``iphone'' \textit{ili} ``samsung''.
 
@@ -245,13 +254,13 @@ Zato tražilice obično omogućuju da se između ključnih riječi stave tzv \te
   \label{boolean}
 \end{figure}
 
-\section{Dodavanje sinonima}
+\subsection{Dodavanje sinonima}
 
 Kada korisnik upiše ključnu riječ ``pećina'' u polje za pretraživanje, on bi najčešće htio u rezultatima dobiti i dokumente koji sadrže riječ ``špilja''. Iz tog razloga se često upit proširuje sa sinonimima svake riječi. Na primjer, koristeći booleove operatore, upit ``mračna pećina'' bi se mogao proširiti na ``mračna pećina OR špilja''.
 
 Postoji mnogo razloga zašto je dodavanje sinonima bolje raditi na upitu, a ne na indeksu. Proširivanje indeksa sinonimima može znatno povećati indeks, a dodatno je potrebno i reindeksiranje svaki put kada se lista sinonima ažurira.
 
-\section{Zamjenski znakovi i regularni izrazi}
+\subsection{Zamjenski znakovi i regularni izrazi}
 
 Naprednijim korisnicima trebalo bi omogućiti maksimalnu preciznost pretraživanja. U tu svrhu može se omogućiti upotreba zamjenskih znakova \textit{?}, koji reprezentira 1 proizvoljan znak, i \textit{*}, koji reprezentira bilo koji broj (uključujući i 0) proizvoljnih znakova (slika \ref{wildcards}). Tako će \textit{bank?} pronaći riječi ``banka'', ``banke'', ``banki'' itd, dok će \textit{bank*} pronaći i riječi kao ``bankama'' i ``bankarstvo''.
 
@@ -264,7 +273,7 @@ Naprednijim korisnicima trebalo bi omogućiti maksimalnu preciznost pretraživan
 
 Dok su ova 2 zamjenska znakova daju kontrolu dovoljnu u većini slučajeva, postoje rijetki slučajevi u kojima je potrebna veća preciznost (npr. pretraživanje programskog kôda). Zato neke tražilice omogućuju i korištenje regularnih izraza\footnote{\url{http://en.wikipedia.org/wiki/Regular_expression}} u upitu.
 
-\section{Ispravljanje zatipaka}
+\subsection{Ispravljanje zatipaka}
 
 Pri unosu upita, često se mogu pojaviti zatipci (eng. \textit{typographical error}); bilo zato što korisnik ne zna kako se neka riječ piše (npr. ako piše na engleskom), ili je korisnik jednostavno pritisnuo krivu tipku na tastaturi, i nije to primjetio. Štoviše, zatipci se mogu pojaviti i u tekstu koji se pretražuje.
 
@@ -272,7 +281,7 @@ Zato je uobičajeno da tražilica tolerira određeni stupanj ``greške'' u unosu
 
 Spomenuli smo pojam međusobne ``sličnosti'' riječi, ali nismo definirali kako se to izračunava. Ovdje je opet od velike pomoći promatranje \textit{n}-grama. Ranije smo radili s \textit{n}-gramima na razini riječi, ali ovaj puta promatramo \textit{n}-grame na razini slova. Najbolja mjera za sličnost dviju riječi je broj zajedničkih \textit{n}-grama\footnote{\cite{taming} str. 99}, konkretnije trigrama\footnote{\url{http://www.postgresql.org/docs/9.4/static/pgtrgm.html}}.
 
-\section{Automatsko nadopunjavanje}
+\subsection{Automatsko nadopunjavanje}
 
 Dok korisnik upisuje znakove u polje za upit, aplikacije često otvaraju listu sugestija iz dokumenata koji se nalaze u indeksu, na temelju znakova koje je korisnik trenutno upisao (slika \ref{typeahead}). (Najčešće se taj niz znakova uzima kao prefix.) To poboljšava korisničko iskustvo na više načina. Prvo, korisniku može skratiti količinu tipkanja tako da korisnik izabere sugestiju umjesto da završi tipkati. Drugo, ako korisnik dobije listu sugestija, onda zna da do sada nije napravio prevelike zatipke. Treće, automatska povratna informacija o korisnikovim upisanim znakovima vodi korisnika da napravi upit koji će sigurno vratiti rezultate.
 
@@ -285,7 +294,7 @@ Dok korisnik upisuje znakove u polje za upit, aplikacije često otvaraju listu s
 
 Lista sugestija se najčešće dobavlja korištenjem \textit{n}-grama, na sličan način kao kod ispravljanja zatipaka. Najprije se dobavljaju riječi koje sadrže barem jedan zajednički \textit{n}-gram s upitom, a zatim se ta lista rangira po broju zajedničkih \textit{n}-grama\footnote{\cite{taming} str. 100}.
 
-\section{Kategorizacija}
+\subsection{Kategorizacija}
 
 Pretpostavimo da korisnik želi kupiti čvrsti disk, ali ne zna točno koji želi. Korisnik otvori \url{www.nabava.net}, i uđe u kategoriju ``Računala > Pohrana podataka > Čvrsti diskovi'' (slika \ref{nabava1}).
 
@@ -320,7 +329,7 @@ Dok se pretraživanje po ključnim riječima koristi kada korisnik zna što žel
 
 Tražilice obično imaju mogućnost vratiti listu dostupnih kategorija (izvađenih iz metapodataka dokumenta), i broj dokumenata koje svaka kategorija sadrži. Garantirano je da svaka vraćena kategorija sadrži barem jedan dokument.
 
-\section{Paginacija}
+\subsection{Paginacija}
 
 Ukoliko je indeks jako velik, traženje \textit{svih} dokumenata koji odgovaraju nekom upitu može trajati dugo. Također, aplikacije najčešće ne žele prikazati sve rezultate na stranici odjednom, jer bi stranica bila prevelika.
 
@@ -335,11 +344,11 @@ Iz tog razloga tražilice često uz upit prihvaćaju i opciju (a) koliko dokumen
 
 Paginacija je moguća i efektivna jer se rangiranje odvija pri pretraživanju, na način da se prvo pretražuju dokumenti koji izgledaju ``relevantnije''. Nakon što se pronašao tražen broj dokumenata, pretraga može stati.
 
-\chapter{Rangiranje}
+\section{Rangiranje}
 
 Dok tražilica pretražuje sve dokumente koji odgovaraju danom upitu, potrebno je odrediti koliko je neki dokument ``relevantan'' upitu. Iako je tražilicama obično moguće proslijediti opciju sortiranja rezultata po nekom kriteriju (npr. alfabetično ili po cijeni), odsustvo te opcije podrazumijeva da tražilica vraća rezultate sortirane po ``relevantnosti''.
 
-\section{Model vektorskog polja}
+\subsection{Model vektorskog polja}
 
 Da bismo rangirali dokumente, potrebno je definirati mjeru ``relevantnosti'' upitu. Najprije je potrebno postaviti model u kojem ćemo definirati tu mjeru. Postoji mnogo različitih modela, a mi ćemo promatrati najpopularniji – model vektorskog polja.
 
@@ -368,7 +377,8 @@ Tada naša dva dokumenta postaju sljedeći vektori:
 
 Sada kada smo definirali model vektorskog polja, možemo definirati pojam ``relevantnosti'' dokumenta upitu. Ukoliko gledamo i upit kao vektor u istom vektorskom prostoru, možemo promatrati koliko se upit podudara s dokumentom tako gledamo kut između ta dva vektora. Ukoliko je kut $0\degree$, znači da imamo potputno podudaranje. Onda možemo definirati ``relevantnost'' kao kosinus tog kuta, koji će uvijek biti broj između $-1$ i $1$, s time da će biti maksimalan ($1$) upravo kada je kut $0\degree$.
 
-\section{Težina riječi} \label{tfidf}
+\subsection{Težina riječi}
+\label{tfidf}
 
 Da bi se poboljšala kvaliteta tražilice, umjesto samo spremanja $1$ za indikaciju da riječ postoji u dokumentu, tražilice obično spremaju neku vrstu težine koja predstavlja relativnu važnost te riječi u odnosu na ostale riječi.
 
@@ -376,11 +386,11 @@ Najčešći sustav težina koji se koristi je \textit{TF-IDF} (eng. \textit{Term
 
 U našem primjeru, u prvom dokumentu se riječ ``Ivica'' pojavljuje $1$ puta, dok se u drugom dokumentu ne pojavljuje. Dakle njena prosječna frekvencija je $0.5$, iz čega slijedi da je njena težina $TF / IDF = 1 / 0.5 = 2$. S druge strane, riječ ``u'' se u oba dokumenta pojavljuje 1 puta, pa je njena težina $1 / 1 = 1$. Napravimo li to za svaku riječ, prvi dokument postaje $$(2,0,1,1,1,1,2,0,2,0)$$
 
-\section{Blizina riječi}
+\subsection{Blizina riječi}
 
 Kod rangiranja je također korisno promatrati koliko su pronađene ključne riječi međusobno udaljene. Kada su pronađene ključne riječi međusobno bliže, onda je dokument intuitivno relevantniji, zato tražilice najčešće rangiraju takve dokumente više. Specijalno, ako su pronađene ključne riječi u dokumentu uzastopne, odnosno ako tvore frazu, taj će se dokument će dobiti veću relevantnost. To znači da, ako je npr. upit jednak naslovu dokumenta, taj dokument će se vrlo vjerojatno rangirati prvi, što odgovara korisnikovim očekivanjima.
 
-\section{Težina dijelova dokumenata}
+\subsection{Težina dijelova dokumenata}
 
 Kao što je spomenuto u poglavlju \ref{indexing}, dokumenti su često indeksirani u dijelovima kojima je dana različita težina. Na primjer, ako se radi o vijestima za novine, naslov vijesti će najčešće imati veću težinu nego sam sadržaj. Zato se dokumenti rangiraju drukčije s obzirom na to koji dio upita se podudara s kojim dijelom dokumenta.
 
