@@ -1,5 +1,5 @@
 \documentclass[a4paper,twoside,12pt]{scrreprt}
- \usepackage{diplomski}
+\usepackage{diplomski}
 
 % Ne znam
 \pagestyle{headings}
@@ -30,6 +30,8 @@
 
 % Degree symboli
 \usepackage{gensymb}
+% Specificiranje tipa numeriranja
+\usepackage{enumerate}
 
 % Omogući slike
 \usepackage{graphicx}
@@ -51,6 +53,8 @@
 
 \chapter{Uvod}
 
+% TODO: Objasni bolje što je dokument
+
 Kada se informacije premjeste iz fizičkih knjiga u digitalni format, moguće ih je puno bolje ``upoznati'' i lakše pretraživati uporabom računala. Kroz godine su razvijene razne metode i tehnike obrade teksta koje su esencijalne za organizaciju digitalnih informacija. U nastavku ćemo jednu sadržajnu cjelinu informacija (knjiga, članak itd) zvati samo \textit{dokument}.
 
 Postoje razne korisne značajke koje se mogu postići obradom teksta. Primjerice, moguće je grupirati nasumičnu kolekciju dokumenata po sličnosti (eng. \textit{clustering}), te korisniku koji čita jedan dokument ponuditi druge, sadržajno \textit{povezane} dokumente. Moguće je iz dokumenata izvaditi najbitnije pojmove, i tako saznati koja je glavna tema dokumenta. I naravno, moguće je pretraživati sve dokumente po nekom upitu, što je nedvojbeno navažnija značajka i biti će tema ovog rada.
@@ -61,13 +65,19 @@ Kvalitetna tražilica ide puno dalje od jednostavnog uspoređivanja niza znakova
 
 Aplikacija, da može pružiti svojim korisnicima mogućnost pretraživanja, može izabrati ili sama implementirati svoju tražilicu, ili koristiti jedan od već postojećih softvera. Budući da danas postoje vrlo kvalitetne tražilice otvorenog koda, nema razloga ne odlučiti se za potonje. U radu ću spomenuti i obraditi sve vodeće softvere za pretraživanjeotvorenog koda. Tražilice otvorenog koda su se naime pokazale da izvrsno funkcioniraju i za vrlo popularne aplikacije.
 
-Za praktični dio rada ću izraditi web aplikaciju u kojoj ću implementirati pretraživanje sa što je moguće više značajki obrađenih u radu. Bazu podataka ću preuzeti iz web stranice Hrvatske znanstvene bibliografije (\url{bib.irb.hr}). Implementirat ću isto pretraživanje sa svakim softverom spomenutim u radu, i uspoređivat ću brzinu pretraživanja i jednostavnost održavanja svake tražilice.
+Za praktični dio rada ću izraditi web aplikaciju u kojoj ću implementirati pretraživanje sa što je moguće više značajki spomenutih u ovom radu. Implementacija će uključivati sve (trenutno) vodeće softvere za pretraživanje, i uspoređivat ću njihovu brzinu i jednostavnost korištenja.
 
 \chapter{Pretraživanje}
+
+% TODO: Zašto obične baze podataka nisu dovoljne? (http://www.postgresql.org/docs/9.4/static/textsearch-intro.html)
+% TODO: Full-text search & structured search (search engine treba imati oboje)
+% TODO: Sortiranje
 
 Kod odabiranja značajki koje će pretraživanje u nekoj aplikaciji imati, uvijek treba napraviti kompromis između kvalitete i kvantitete. \textit{Kvaliteta} se odnosi na relevantnost dokumenta upitu, dok se \textit{kvantiteta} odnosi na broj vraćenih rezultata. Ukoliko tražilica koristi mnogo značajki pri pretraživanju, pretraga može biti spora ako je broj dokumenata velik. Također, u nekim slučajevima je broj dokumenata vrlo mali, pa u tom slučaju možemo "olabaviti" neke zahtjeve tako da tražilica može vratiti više rezultata. S druge strane, ako tražilica nije dovoljno kvalitetna, korisnik možda neće moći naći traženi dokument. Koji kompromis između kvalitete i kvantitete uzeti skoro uvijek ovisi o samoj aplikaciji.
 
 Proces pretraživanja može se opisati u četiri dijela:
+
+% TODO: + Distribuiranost (sharding, replike, nodeovi, clustering), to MORA biti objašnjeno (da li da to u zaključku?)
 
 \begin{compactenum}
   \item \textbf{Indeksiranje} – Datoteke i baze podataka obrađuju se i pripremaju za pretraživanje
@@ -80,6 +90,9 @@ Proces pretraživanja može se opisati u četiri dijela:
 
 \section{Indeksiranje}
 \label{indexing}
+
+% TODO: Razmisli o strukturi naslova: Preprocesiranje, Analiza, Spremanje
+% TODO: stop-riječi i korjenizacija zahtijevaju riječnik
 
 Prije nego korisnik napravi bilo kakav upit, tražilica treba ``poznavati'' sadržaj koji pretražuje. Na primjer, ako dokumenti koji se pretražuju imaju naslov, i mi znamo da je taj naslov puno informativniji od tijela dokumenta, možemo informirati tražilicu da da veću težinu dokumentima kojima je dio upita pronađen u naslovu, time ih rangirajući više u rezultatima.
 
@@ -256,6 +269,8 @@ Zato tražilice obično omogućuju da se između ključnih riječi stave tzv \te
 
 \subsection{Dodavanje sinonima}
 
+% TODO: Proširivanje indeksa sinonimima znači da za *svaku* riječ dodajemo *svaki* sinonim u indeks.
+
 Kada korisnik upiše ključnu riječ ``pećina'' u polje za pretraživanje, on bi najčešće htio u rezultatima dobiti i dokumente koji sadrže riječ ``špilja''. Iz tog razloga se često upit proširuje sa sinonimima svake riječi. Na primjer, koristeći booleove operatore, upit ``mračna pećina'' bi se mogao proširiti na ``mračna pećina OR špilja''.
 
 Postoji mnogo razloga zašto je dodavanje sinonima bolje raditi na upitu, a ne na indeksu. Proširivanje indeksa sinonimima može znatno povećati indeks, a dodatno je potrebno i reindeksiranje svaki put kada se lista sinonima ažurira.
@@ -294,7 +309,7 @@ Dok korisnik upisuje znakove u polje za upit, aplikacije često otvaraju listu s
 
 Lista sugestija se najčešće dobavlja korištenjem \textit{n}-grama, na sličan način kao kod ispravljanja zatipaka. Najprije se dobavljaju riječi koje sadrže barem jedan zajednički \textit{n}-gram s upitom, a zatim se ta lista rangira po broju zajedničkih \textit{n}-grama\footnote{\cite{taming} str. 100}.
 
-\subsection{Kategorizacija}
+\subsection{Specificiranje polja}
 
 Pretpostavimo da korisnik želi kupiti čvrsti disk, ali ne zna točno koji želi. Korisnik otvori \url{www.nabava.net}, i uđe u kategoriju ``Računala > Pohrana podataka > Čvrsti diskovi'' (slika \ref{nabava1}).
 
@@ -325,11 +340,11 @@ Budući da korisnik želi na taj disk uglavnom spremati filmove, odluči da mu t
 
 I uz odgovarajuće sortiranje korisnik pronađe željeni disk. Da korisnik nije imao lijevi izbornik koji mu je pomogao filtrirati proizvode po određenim kategorijama, teško bi mogao naći željeni čvrsti disk, jer u ovim slučajevima jedno tekstualno polje za pretraživanje nije dovoljno.
 
-Dok se pretraživanje po ključnim riječima koristi kada korisnik zna što želi naći i samo želi doći do toga u aplikaciji, kategorizacija (eng. \textit{faceting}) je vrlo korisna kada korisnik ne zna točno što traži, nego želi vidjeti što je ``dostupno''. Kod pretraživanja po ključnim riječima korisnik očekuje željeni dokument u prvih par rezultata, dok kategorizacija ne treba pružati tu garanciju, jer su kategorije često vrlo generičke.
-
-Tražilice obično imaju mogućnost vratiti listu dostupnih kategorija (izvađenih iz metapodataka dokumenta), i broj dokumenata koje svaka kategorija sadrži. Garantirano je da svaka vraćena kategorija sadrži barem jedan dokument.
+Zato tražilice omogućuju i upite koji će pretraživati specifična polja dokumenata. Gornji primjer je slučaj kada su moguće vrijednosti polja već predefinirane korisniku. Generalno, postoje dvije vrste upita po poljima. Jedna vrsta je upisivanje specifične vrijednosti polja, što je pogodno za tekstualna polja kao što su ``autor'' i ``kategorija''. Druga vrsta je specificiranje nekog intervala vrijednosti, što je pogodno za numerička i vremenska polja kao što su ``cijena'' i ``datum rođenja''.
 
 \subsection{Paginacija}
+
+% TODO: Paginacija je sporija što je veći page, tako da ne treba biti puno pageva (http://www.elasticsearch.org/guide/en/elasticsearch/guide/current/pagination.html)
 
 Ukoliko je indeks jako velik, traženje \textit{svih} dokumenata koji odgovaraju nekom upitu može trajati dugo. Također, aplikacije najčešće ne žele prikazati sve rezultate na stranici odjednom, jer bi stranica bila prevelika.
 
@@ -345,6 +360,8 @@ Iz tog razloga tražilice često uz upit prihvaćaju i opciju (a) koliko dokumen
 Paginacija je moguća i efektivna jer se rangiranje odvija pri pretraživanju, na način da se prvo pretražuju dokumenti koji izgledaju ``relevantnije''. Nakon što se pronašao tražen broj dokumenata, pretraga može stati.
 
 \section{Rangiranje}
+
+% TODO: I duljina polja ima ulogu u rangiranju. Ako je polje kraće (title), onda je pronađena riječ veći deal nego ako je dulje (body).
 
 Dok tražilica pretražuje sve dokumente koji odgovaraju danom upitu, potrebno je odrediti koliko je neki dokument ``relevantan'' upitu. Iako je tražilicama obično moguće proslijediti opciju sortiranja rezultata po nekom kriteriju (npr. alfabetično ili po cijeni), odsustvo te opcije podrazumijeva da tražilica vraća rezultate sortirane po ``relevantnosti''.
 
@@ -394,17 +411,129 @@ Kod rangiranja je također korisno promatrati koliko su pronađene ključne rije
 
 Kao što je spomenuto u poglavlju \ref{indexing}, dokumenti su često indeksirani u dijelovima kojima je dana različita težina. Na primjer, ako se radi o vijestima za novine, naslov vijesti će najčešće imati veću težinu nego sam sadržaj. Zato se dokumenti rangiraju drukčije s obzirom na to koji dio upita se podudara s kojim dijelom dokumenta.
 
+
 \chapter{Implementacija}
+
+U prethodnom poglavlju smo obradili sve glavne značajke koje tražilice mogu imati, a u ovom poglavlju ću napraviti uvod za praktični dio ovog rada. Praktično dio će se sastojati od implementacije pretraživanja u svakom od vodećih softvera otvorenog koda. Najprije ću u ovom poglavlju navesti i opisati svaki softver koji će se koristiti, a zatim ću opisati samu aplikaciju za pretraživanje u kojoj ću koristiti svaki softver. Cilj praktičnog dijela je primjeniti vodeće softvere na stvarnu bazu podataka, i usporediti ih na razini brzine i jednostavnosti korištenja.
 
 \section{Softveri}
 
+% TODO: Spomeni da svaki (?) softver sadrži built-in riječnike i/ili da može importati Snowball
+% TODO: "pretraživanje" => "pretraživanje teksta" (da se zna što je baza, a što full-text search)
+% TODO: document naspram relational baza (http://www.elasticsearch.org/guide/en/elasticsearch/guide/current/_indexing_employee_documents.html)
+% TODO: reći i za ostale softvere da li se sami brinu za distribuiranost
+
+\subsection{Apache Lucene}
+
+\textit{Apache Lucene} je programska biblioteka sa funkcionalnostima za pretraživanje teskta, napisana u Javi i javno distribuirana pod licencom ``Apache License 2.0''. Lucene nije potpuna aplikacija za pretraživanje, već pruža sučelje za pretraživanje na nižoj razini, kroz Java API\footnote{eng. \textit{application programming interface}}.
+
+Neke od glavnih značajki Apache Lucene uključuju:
+
+\begin{itemize}
+  \item rangirano pretraživanje (najrelevantniji rezultati su vraćeni prvi),
+  \item mnogo vrsta upita (fraze, zamjenski znakovi, intervali itd),
+  \item pretraživanje po poljima (e.g. naslov, autor itd),
+  \item sortiranje po proizvoljnom polju,
+  \item pretraživanje po više indeksa sa integriranim rezultatima,
+  \item paralelno ažuriranje i pretraživanje, i
+  \item ispravljanje zatipaka
+\end{itemize}
+
+Sa višeg nivoa, Lucene se koristi na sljedeći način. Prvo inicijaliziramo dokumente koji mogu imati jedno ili više polja. Zatim specificiramo analizator dokumenata, koji će tokenizirati dokumente po poljima (ne moramo nužno koristiti analizator koji dolazi s Apache Lucene), kodek koji će kodirati i dekodirati iz invertiranog indeksa, i način kako će se indeks perzistirati (na disku, u memoriji itd). Nakon toga možemo napraviti upit, koji prvo prolazi kroz razne analizatore (fraze, booleovi operatori itd), nakon čega se uspoređuje s indeksom i vraćaju se rezultati.
+
 \subsection{Apache Solr}
+
+\textit{Apache Solr} je platforma za pretraživanje sagrađena na Apache Lucene, napisana u Javi i javno distribuirana pod licencom ``Apache License 2.0''.
+
+Solr se koristi tako da se pokrene kao web aplikacija, i s njom se onda komunicira preko HTTP protokola (koristeći formate JSON, XML ili CSV). Neki od glavnih URL-ova iz Solr-ovog HTTP API-a su:
+
+\begin{description}
+  \item[\texttt{POST /solr/update}] \hfill \\ Za dodavanje novih, ažuriranje i brisanje postojećih dokumenata iz indeksa.
+  \item[\texttt{GET /solr/<collection>/select}] \hfill \\ Za pretraživanje indeksiranih dokumenata
+\end{description}
+
+Osim značajki koje uzima iz Apache Lucene, Solr ima i mnogo dodatnih sposobnosti:
+
+\begin{itemize}
+  \item mogućnost upravljanja bilo kojim programskim jezikom (jer se komunikacija odvija preko HTTP-a),
+  \item indeksiranje mnogobrojnih formata datoteki (.pdf, .doc itd) koristeći Apache Tika,
+  \item administrativno sučelje za upravljanje tražilice,
+  \item upravljanje replikama indeksa,
+  \item geoprostorno pretraživanje,
+  \item predmemoriranje (eng. \textit{caching}),
+  \item nativna podrška za upravljanje valutama (npr. određivanje valute iz simbola i automatske konverzije) itd.
+\end{itemize}
+
+Neke od poznatijih organizacija koje koriste Apache Solr su CIA i Drupal\footnote{\url{https://www.drupal.org/node/447564}}.
 
 \subsection{Sphinx}
 
+\textit{Sphinx} je platforma za pretraživanje teksta, napisana u C++u i javno distribuirana pod licencom ``GNU GPL v2.0''. Sphinx je specijalno dizajniran za dobru integraciju sa SQL bazama podataka, i da se može lako pristupiti skriptnim jezicima.
+
+Aplikacije mogu pristupiti Sphinx-u na tri načina:
+
+\begin{enumerate}[(a)]
+  \item preko Sphinx-ove vlastite implementacije MySQL mrežnog protokola, \textit{SphinxQL}-a (ovo je preporučeni način)
+  \item preko nativnog API-a za pretraživanje, \textit{SphinxAPI}
+  \item kroz MySQL server sa konfiguriranim spremanjem u \textit{SphinxSE}
+\end{enumerate}
+
+Neke od glavnih značajki Sphinx-a uključuju:
+
+\begin{itemize}
+  \item nativna integracija sa svim poznatim SQL bazama (PostgreSQL, MySQL, MS SQL, Orcale itd)
+  \item vrlo dobra skalabilnost i podrška za distribuiranost
+  \item vrlo napredne vrste upita (npr. PARAGRAPH i SENTENCE operator i "before" operator)
+  \item sve poznate elemente pretraživanja (stop-riječi, dokumenti s više polja, korjenovanje itd)
+  \item vrlo napredno i potpuno konfigurabilno rangiranje na principu dodavanja faktora (blizina riječi, TF-IDF itd)
+  \item sortiranje po relevantnosti ili poljima
+  \item grupiranje (eng. \textit{clustering}) rezultata
+  \item CLI\footnote{eng. \textit{command-line interface}} za upravljanje bazom
+\end{itemize}
+
+Neke od poznatijih organizacija koje koriste Sphinx su Tumblr i CouchSurfing\footnote{\url{http://sphinxsearch.com/info/powered/}}.
+
 \subsection{PostgreSQL}
 
-\subsection{ElasticSearch}
+PostgreSQL je objektno-relacijska baza podataka, napisana u C-u i javno distribuirana pod licencom ``PostgreSQL License'' (slična BSD i MIT licenci). Iako baze podataka obično nisu namijenjene vrsti pretraživanja kakvu obrađujemo u ovom radu, PostgreSQL se ističe svojim sposobnostima naprednog pretraživanja teksta te je validan konkurent.
+
+Neke glavne značajke i prednosti korištenja PostgreSQL-a za pretraživanje su:
+
+\begin{itemize}
+  \item nije potreban poseban softver koji treba održavati, već se svi podaci mogu pretraživati direktno iz baze
+  \item samoažurirajući indeks
+  \item napredna tokenizacija (uz uobičajene karakteristike prepoznaje emailove, URL-ove, imena datoteki itd)
+  \item konfigurabilno rangiranje
+  \item konfigurabilni označeni rezultati
+  \item dobre introspekcijske sposobnosti i testiranje
+\end{itemize}
+
+\subsection{Elasticsearch}
+
+Elasticsearch je distribuirana platforma za pretraživanje i analitiku u realnom vremenu, sagrađena na Apache Lucene. Napisana je u Javi i javno distribuirana pod licencom "Apache License 2.0". Kao Apache Solr, Elasticsearch je isto web aplikacija s kojom se komunicira preko HTTP API-a (koristeći isključivo JSON format):
+
+\begin{description}
+  \item[\texttt{PUT /<namespace>/<type>/<id>}] \hfill \\ Za dodavanje novih, ažuriranje postojećih dokumenata u indeksu
+  \item[\texttt{GET /<namespace>/<type>/<id>}] \hfill \\ Za dobivanje indeksiranih dokumenata
+  \item[\texttt{GET /<namespace>/<type>/_search}] \hfill \\ Za pretraživanje indeksiranih dokumenata
+  \item[\texttt{DELETE /<namespace>/<type>/<id>}] \hfill \\ Za pretraživanje indeksiranih dokumenata
+\end{description}
+
+Neke od glavnih značajki Elasticsearch-a uključuju:
+
+\begin{itemize}
+  \item automatska distribuiranost (npr. indeksi se po potrebi automatski repliciraju i razdvajaju u dijelove)
+  \item jednostavan HTTP API (slijedi konvencije REST-a\footnote{\url{http://www.ics.uci.edu/~fielding/pubs/dissertation/top.htm}})
+  \item nativni Java API
+  \item koristi dokumentno-orijentiranu bazu
+  \item kontrola paralelnih zahtjeva
+  \item napredna introspekcija (npr. uvid zašto dokument je/nije pronađen)
+  \item napredna agregacija podataka
+  \item napredno i konfigurabilno rangiranje
+  \item podrška za geolokacije
+\end{itemize}
+
+Neke od poznatijih organizacija koje koriste Elasticsearch su Wikipedia, The Guardian, Stack Overflow i GitHub\footnote{\cite{elastic} na \url{http://www.elasticsearch.org/guide/en/elasticsearch/guide/current/getting-started.html}}.
 
 \section{Aplikacija}
 
@@ -420,7 +549,11 @@ Kao što je spomenuto u poglavlju \ref{indexing}, dokumenti su često indeksiran
 
 \begin{thebibliography}{99}
   \bibitem{taming} G. S. Ingersoll, T. S. Morton, A. L. Farris, \textit{Taming Text: How to Find, Organize, and Manipulate It}, Manning Publications Co, Zagreb, 2013.
-  \bibitem{elastic} C. Gormley, Z. Tong, dostupno na \url{http://www.elasticsearch.org/guide/en/elasticsearch/guide/current/index.html} (veljača 2014.)
+  \bibitem{lucene} \url{http://lucene.apache.org/core/4_10_3/} (siječanj, 2015)
+  \bibitem{solr} \url{http://ftp.carnet.hr/misc/apache/lucene/solr/ref-guide/apache-solr-ref-guide-4.10.pdf} (siječanj, 2015)
+  \bibitem{sphinx} \url{http://sphinxsearch.com/docs/latest/index.html} (siječanj, 2015)
+  \bibitem{postgres} \url{http://www.postgresql.org/docs/9.4/static/index.html} (siječanj, 2015)
+  \bibitem{elastic} C. Gormley, Z. Tong, dostupno na \url{http://www.elasticsearch.org/guide/en/elasticsearch/guide/current/index.html} (siječanj, 2015)
 \end{thebibliography}
 
 \pagestyle{empty}
