@@ -1,0 +1,11 @@
+defaults: &defaults
+  adapter: "postgresql"
+  encoding: "unicode"
+
+development:
+  <<: *defaults
+  database: "bibliography_development"
+
+test:
+  <<: *defaults
+  database: "bibliography_test"
