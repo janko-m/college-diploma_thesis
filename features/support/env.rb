@@ -16,7 +16,7 @@ After  { DatabaseCleaner.clean }
 World Rack::Test::Methods
 World Module.new {
   def app
-    ScientificBibliography.set :show_exceptions, false
-    ScientificBibliography.new
+    Crosbi.set :show_exceptions, false
+    Crosbi.new
   end
 }

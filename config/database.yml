@@ -4,8 +4,8 @@ defaults: &defaults
 
 development:
   <<: *defaults
-  database: "bibliography_development"
+  database: "bibliografija"
 
 test:
   <<: *defaults
-  database: "bibliography_test"
+  database: "bibliografija"

@@ -1,10 +1,9 @@
 require "sinatra/base"
 require "sinatra/activerecord"
 
-require_relative "models/paper"
-require_relative "models/member"
+require_relative "models"
 
-class ScientificBibliography < Sinatra::Base
+class Crosbi < Sinatra::Base
   register Sinatra::ActiveRecordExtension
 
   get "/" do
