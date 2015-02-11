@@ -9,3 +9,9 @@ features.md
 *.out
 *.lof
 *.sty
+
+data/movies.*
+data/plot.*
+data/sphinx.conf
+
+tmp/

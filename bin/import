@@ -1,0 +1,162 @@
+#!/usr/bin/env ruby
+
+require "bundler/setup"
+
+require "tty-progressbar"
+require "delegate"
+require "forwardable"
+require "pry"
+
+module IMDb
+  class Downloader
+    def initialize(url)
+      @url = url
+    end
+
+    def download(names)
+      names.map do |name|
+        unless File.exists?("data/#{name}.list")
+          download_file("#{name}.list.gz", "data/#{name}.list.gz")
+          unzip_file("data/#{name}.list.gz")
+          encode_file("data/#{name}.list")
+        end
+        "data/#{name}.list"
+      end
+    end
+
+    private
+
+    def download_file(source, destination)
+      system "wget #{File.join(URL, source)} -O #{destination} --quiet --show-progress"
+    end
+
+    def unzip_file(filename)
+      system "gzip --decompress --force #{filename}"
+    end
+
+    def encode_file(filename)
+      system "vim #{filename} -c 'set fileencoding=utf-8 | write | quit'"
+    end
+  end
+
+  class Extractor
+    MOVIE_REGEX = /^
+      (?<title>.+)\s                   # Game of Thrones
+      \((?<year>\S+)\)\s?              # (1994)
+      (\{(?<episode_name>.+)?\s?       #
+      (\(\#(?<season_number>\d+)\.     ## {The Watchers on the Wall (#4.5)}
+       (?<episode_number>\d+)\)\})?)?  #
+    /x
+
+    def extract(filenames, number)
+      movies = extract_movies(filenames.grep(/movie/).first, number)
+
+      current_idx = 0
+      extract_plots(filenames.grep(/plot/).first) do |movie, plot|
+        break if movie[:title] > movies.last[:title]
+        (current_idx..movies.size - 1).each do |idx|
+          if movies[idx] == movie
+            movies[idx][:plot] = plot
+            current_idx = idx
+            break
+          end
+        end
+      end
+
+      movies
+    end
+
+    private
+
+    def extract_movies(filename, number)
+      each_line(filename, number + 15).each_with_object([]) do |(line, line_number), movies|
+        next if line_number < 16
+        next if line.start_with?("------")
+        next if line.include?("SUSPENDED") || line.include?("(????)")
+
+        movies << extract_movie(line)
+      end
+    end
+
+    def extract_plots(filename)
+      current_movie = plot = nil
+      each_line(filename) do |line, line_number|
+        next if line_number < 16
+
+        if line.start_with?("MV:")
+          current_movie = extract_movie(line.match(/^MV: /).post_match)
+          plot = ""
+        elsif line.start_with?("PL:")
+          plot << line.match(/^PL: /).post_match
+        elsif line.start_with?("------")
+          yield current_movie, plot
+        end
+      end
+    end
+
+    def each_line(filename, lines = line_count(filename))
+      return enum_for(:each_line, filename, lines) if not block_given?
+      progress_bar = ProgressBar.new(filename, lines)
+      File.open(filename).each_line.with_index do |line, idx|
+        break if idx + 1 > lines
+        yield line, idx + 1
+        progress_bar.current = idx + 1
+      end
+    ensure
+      progress_bar.finish if progress_bar
+    end
+
+    def line_count(filename)
+      `wc -l #{filename}`.to_i
+    end
+
+    def extract_movie(line)
+      match = line.match(MOVIE_REGEX)
+      raise "line not matching: #{line}" if match.nil?
+
+      {
+        title:          match[:title].gsub(/^"|"$/, ""),
+        year:           match[:year].to_i,
+        plot:           "",
+        episode_name:   match[:episode_name],
+        episode_number: (Integer(match[:episode_number]) rescue nil),
+        season_number:  (Integer(match[:season_number]) rescue nil),
+      }
+    end
+  end
+
+  class ProgressBar < DelegateClass(TTY::ProgressBar)
+    def initialize(name, total, **options)
+      progress_bar = TTY::ProgressBar.new("#{name}: :bar :percent",
+        total: total, width: 50, complete: "#")
+
+      super(progress_bar)
+    end
+  end
+end
+
+puts "Downloading..."
+
+downloader = IMDb::Downloader.new("ftp://ftp.fu-berlin.de/pub/misc/movies/database")
+filenames = downloader.download(["movies", "plot"])
+
+puts "Extracting..."
+
+extractor = IMDb::Extractor.new
+movies = extractor.extract(filenames, 1_000)
+
+puts "Importing..."
+
+$LOAD_PATH.unshift("./lib")
+require "engine"
+
+engines = [
+  # Engine::Postgres.new,
+  # Engine::Elasticsearch.new,
+  # Engine::Solr.new,
+  Engine::Sphinx.new,
+]
+
+engines.each do |engine|
+  engine.import(movies)
+end

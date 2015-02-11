@@ -1,32 +1,24 @@
 source "https://rubygems.org"
 
-gem "sinatra", "~> 1.4"
-gem "rake"
+gem "celluloid"
+gem "tty-progressbar"
 
-gem "sinatra-activerecord", ">= 2.0.5"
-gem "activerecord", "~> 4.2"
-gem "sequel"
+gem "pry"
+gem "pry-byebug"
+gem "pry-rescue"
+gem "pry-stack_explorer"
 
 # Postgres
 gem "pg"
-gem "pg_search", "~> 0.7.9"
+gem "sequel"
 
 # Elasticsearch
-gem "elasticsearch-model"
+gem "elasticsearch"
+gem "patron"
 
 # Solr
-gem "sunspot"
+gem "rsolr"
 
 # Sphinx
-gem "thinking-sphinx"
-
-group :development, :test do
-  gem "pry"
-end
-
-group :test do
-  gem "cucumber"
-  gem "minitest"
-  gem "rack-test"
-  gem "database_cleaner"
-end
+gem "riddle"
+gem "mysql2"
