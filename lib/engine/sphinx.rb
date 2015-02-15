@@ -5,18 +5,22 @@ require "sequel"
 
 class Engine
   class Sphinx < Engine
-    def import(movies)
+    def setup
       create_database
       create_table
+    end
+
+    def clear
       start
-      add(movies)
+      db[:movies].delete
+    end
+
+    def import(movies)
+      start
+      db[:movies].multi_insert(movies)
     end
 
     private
-
-    def add(movies)
-      db[:movies].multi_insert(movies)
-    end
 
     def create_database
       mysql = Mysql2::Client.new(username: "root")

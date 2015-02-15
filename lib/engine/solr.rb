@@ -2,14 +2,14 @@ require "rsolr"
 
 class Engine
   class Solr < Engine
-    def import(movies)
-      clear_data
-      add(movies)
+    def setup
     end
 
-    private
+    def clear
+      client.delete_by_query "*:*"
+    end
 
-    def add(movies)
+    def import(movies)
       client.add movies.map.with_index { |movie, id|
         {
           id:               id,
@@ -23,9 +23,7 @@ class Engine
       }
     end
 
-    def clear_data
-      client.delete_by_query "*:*"
-    end
+    private
 
     def client
       @client ||= RSolr.connect

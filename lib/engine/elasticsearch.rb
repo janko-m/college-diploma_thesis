@@ -3,17 +3,21 @@ require "elasticsearch"
 
 class Engine
   class Elasticsearch < Engine
-    def import(movies)
+    def setup
       create_index
-      add(movies)
     end
 
-    private
+    def clear
+      client.delete_by_query index: "diploma", type: "movie",
+        body: {query: {match_all: {}}}
+    end
 
-    def add(movies)
+    def import(movies)
       client.bulk index: "diploma", type: "movie",
         body: movies.map { |movie| {create: {body: movie}} }
     end
+
+    private
 
     def create_index
       client.indices.delete index: "diploma" if client.indices.exists index: "diploma"

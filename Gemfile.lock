@@ -45,6 +45,7 @@ GEM
     pry-stack_explorer (0.4.9.1)
       binding_of_caller (>= 0.7)
       pry (>= 0.9.11)
+    rake (10.4.2)
     riddle (1.5.11)
     rsolr (1.0.10)
       builder (>= 2.1.2)
@@ -69,6 +70,7 @@ DEPENDENCIES
   pry-byebug
   pry-rescue
   pry-stack_explorer
+  rake
   riddle
   rsolr
   sequel

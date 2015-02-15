@@ -3,17 +3,20 @@ require "sequel"
 
 class Engine
   class Postgres < Engine
-    def import(movies)
+    def setup
       create_database
       create_table
-      add(movies)
+    end
+
+    def clear
+      db[:movies].delete
+    end
+
+    def import(movies)
+      db[:movies].multi_insert(movies)
     end
 
     private
-
-    def add(movies)
-      db[:movies].multi_insert(movies)
-    end
 
     def create_table
       db.create_table :movies do
