@@ -16,7 +16,7 @@ gem "sequel"
 
 # Elasticsearch
 gem "elasticsearch"
-gem "patron"
+gem "typhoeus"
 
 # Solr
 gem "rsolr"

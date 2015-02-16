@@ -3,21 +3,34 @@ require "riddle/2.1.0"
 require "mysql2"
 require "sequel"
 
+require "benchmark"
+
 class Engine
   class Sphinx < Engine
     def setup
+      controller.stop
       create_database
       create_table
     end
 
     def clear
-      start
       db[:movies].delete
     end
 
     def import(movies)
-      start
-      db[:movies].multi_insert(movies)
+      controller.stop
+      movies.each_slice(1_000) do |slice|
+        db[:movies].multi_insert(slice)
+      end
+      controller.index(verbose: true)
+      controller.start
+    end
+
+    def search(query)
+      limit = db[:movies].count
+      Benchmark.realtime do
+        sphinx_db[:movies].where("MATCH(?)", query).limit(limit).to_a
+      end * 1000
     end
 
     private
@@ -30,18 +43,13 @@ class Engine
 
     def create_table
       db.create_table :movies do
-        column :title,          :varchar
-        column :year,           :integer
-        column :plot,           :text
-        column :episode_name,   :varchar
-        column :episode_number, :integer
-        column :season_number,  :integer
-      end
-    end
+        primary_key :id
 
-    def start
-      controller.start
-      at_exit { controller.stop }
+        column :title,   :varchar
+        column :year,    :integer
+        column :plot,    :text
+        column :episode, :varchar
+      end
     end
 
     def controller
@@ -49,30 +57,28 @@ class Engine
     end
 
     def configuration
-      full_text_fields = %w[title year plot episode_name]
-      attributes       = %w[episode_number season_number]
-
       @configuration ||= Riddle::Configuration.new.tap do |configuration|
         source = Riddle::Configuration::SQLSource.new('movies', 'mysql')
-        source.sql_host      = "localhost"
-        source.sql_user      = "root"
-        source.sql_db        = "diploma"
-        source.sql_port      = "3306"
-        source.sql_query     = "SELECT * FROM movies"
-        source.sql_attr_uint = attributes
-        configuration.sources << source
+        source.sql_host       = "127.0.0.1"
+        source.sql_user       = "root"
+        source.sql_pass       = ""
+        source.sql_db         = "diploma"
+        source.sql_port       = "3306"
+        source.sql_query      = "SELECT * FROM movies"
+        source.sql_range_step = 1_000
 
-        index = Riddle::Configuration::RealtimeIndex.new("movies")
-        index.path         = "/usr/local/var/data/movies_rt"
-        index.rt_field     = full_text_fields
-        index.rt_attr_uint = attributes
+        index = Riddle::Configuration::Index.new("movies")
+        index.sources      = [source]
+        index.path         = "/usr/local/var/data/index"
+        index.docinfo      = "extern"
         configuration.indices << index
 
-        configuration.searchd.listen    = "127.0.0.1:9306"
-        configuration.searchd.workers   = "threads"
-        configuration.searchd.pid_file  = File.expand_path("tmp/sphinx.pid")
-        configuration.searchd.log       = File.expand_path("tmp/searchd.log")
-        configuration.searchd.query_log = File.expand_path("tmp/searchd.query.log")
+        configuration.searchd.address     = "127.0.0.1"
+        configuration.searchd.mysql41     = 9306
+        configuration.searchd.workers     = "threads"
+        configuration.searchd.pid_file    = File.expand_path("tmp/sphinx.pid")
+        configuration.searchd.log         = File.expand_path("tmp/searchd.log")
+        configuration.searchd.query_log   = File.expand_path("tmp/searchd.query.log")
         configuration.searchd.binlog_path = nil
 
         File.write(config_path, configuration.render)
@@ -85,6 +91,10 @@ class Engine
 
     def db
       @db ||= Sequel.connect("mysql2://root@localhost/diploma")
+    end
+
+    def sphinx_db
+      @sphinx_db ||= Sequel.connect("mysql2://root@127.0.0.1:9306/diploma")
     end
 
     def client

@@ -34,11 +34,9 @@ module IMDb
 
   class Extractor
     MOVIE_REGEX = /^
-      (?<title>.+)                     # Game of Thrones
-      \s\((?<year>\d{4})\)             # (1994)
-      (\s\{(?<episode_name>.+)         #
-       \s\(\#(?<season_number>\d+)     ## {The Watchers on the Wall (#4.5)}
-       \.(?<episode_number>\d+)\)\})?  #
+      (?<title>.+)\s        # Game of Thrones
+      \((?<year>\d{4})\)\s  # (1994)
+      (\{(?<episode>.+)\})? # {The Watchers on the Wall (#4.5)}
     /x
 
     def self.extract(path, number)
@@ -80,12 +78,9 @@ module IMDb
       return if match.nil?
 
       {
-        title:          match[:title].gsub(/^"|"$/, ""),
-        year:           match[:year].to_i,
-        plot:           "",
-        episode_name:   match[:episode_name],
-        episode_number: (Integer(match[:episode_number]) rescue nil),
-        season_number:  (Integer(match[:season_number]) rescue nil),
+        title:   match[:title].gsub(/^"|"$/, ""),
+        year:    match[:year].to_i,
+        episode: match[:episode],
       }
     end
   end
@@ -98,7 +93,7 @@ task :import do
 
   puts "Extracting..."
 
-  movies = IMDb::Extractor.extract(path, 1_100)
+  movies = IMDb::Extractor.extract(path, 10_000)
 
   puts "Importing..."
 

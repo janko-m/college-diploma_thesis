@@ -1,4 +1,4 @@
-require "patron"
+require "typhoeus/adapters/faraday"
 require "elasticsearch"
 
 class Engine
@@ -8,20 +8,39 @@ class Engine
     end
 
     def clear
-      client.delete_by_query index: "diploma", type: "movie",
-        body: {query: {match_all: {}}}
+      client.indices.delete_mapping index: "diploma", type: "movie"
     end
 
     def import(movies)
       client.bulk index: "diploma", type: "movie",
-        body: movies.map { |movie| {create: {body: movie}} }
+        body: movies.map { |movie| {create: {data: movie}} }
+    end
+
+    def search(query)
+      response = client.search index: "diploma", body: {
+        query: {
+          match: {_all: query},
+        }
+      }
+      response.fetch("took")
     end
 
     private
 
     def create_index
       client.indices.delete index: "diploma" if client.indices.exists index: "diploma"
-      client.indices.create index: "diploma"
+      client.indices.create index: "diploma", body: {
+        mappings: {
+          movie: {
+            # properties: {
+            #   title:   {type: "string",  index: "analyzed"},
+            #   year:    {type: "integer", index: "analyzed"},
+            #   plot:    {type: "string",  index: "analyzed"},
+            #   episode: {type: "string",  index: "analyzed"},
+            # }
+          }
+        }
+      }
     end
 
     def client

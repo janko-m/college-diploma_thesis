@@ -22,15 +22,17 @@ GEM
     elasticsearch-transport (1.0.6)
       faraday
       multi_json
+    ethon (0.7.2)
+      ffi (>= 1.3.0)
     faraday (0.9.1)
       multipart-post (>= 1.2, < 3)
+    ffi (1.9.6)
     hitimes (1.2.2)
     interception (0.5)
     method_source (0.8.2)
     multi_json (1.10.1)
     multipart-post (2.0.0)
     mysql2 (0.3.17)
-    patron (0.4.18)
     pg (0.18.1)
     pry (0.10.1)
       coderay (~> 1.1.0)
@@ -56,6 +58,8 @@ GEM
     tty-progressbar (0.5.0)
       tty-screen (~> 0.1.0)
     tty-screen (0.1.0)
+    typhoeus (0.7.1)
+      ethon (>= 0.7.1)
 
 PLATFORMS
   ruby
@@ -64,7 +68,6 @@ DEPENDENCIES
   celluloid
   elasticsearch
   mysql2
-  patron
   pg
   pry
   pry-byebug
@@ -75,3 +78,4 @@ DEPENDENCIES
   rsolr
   sequel
   tty-progressbar
+  typhoeus

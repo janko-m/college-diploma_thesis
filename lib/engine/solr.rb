@@ -16,11 +16,14 @@ class Engine
           title_s:          movie.fetch(:title),
           year_i:           movie.fetch(:year),
           plot_t:           movie.fetch(:plot),
-          episode_name_s:   movie.fetch(:episode_name),
-          episode_number_i: movie.fetch(:episode_number),
-          season_number_i:  movie.fetch(:season_number),
+          episode_s:        movie.fetch(:episode),
         }
       }
+    end
+
+    def search(query)
+      response = client.get "select", params: {q: "*:*"}
+      response["responseHeader"].fetch("QTime")
     end
 
     private

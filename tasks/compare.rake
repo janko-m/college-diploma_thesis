@@ -1,45 +1,40 @@
 require "celluloid"
 
-class Searcher
-  include Celluloid
+Celluloid.logger.level = Logger::ERROR
 
-  def search(engine, query)
-    duration = engine.search(query)
-    $query_times[engine.name] << duration
+class Array
+  def avg
+    inject(0, :+).to_f / size
   end
 end
 
-class Indexer
+class Sender
   include Celluloid
 
-  def index(engine, record)
-    duration = engine.index(record)
-    $query_times[engine.name] << duration
+  def call(object, method, *args, &block)
+    object.send(method, *args, &block)
   end
 end
+
+QUERIES = ["Love", "Student", "Family", "Life", "Partner"]
 
 task :compare do
-  $query_times = Hash.new { |h, k| h[k] = Queue.new }
-  $index_times = Hash.new { |h, k| h[k] = Queue.new }
+  puts "Warmup..."
+  5.times { query; sleep 1 }
 
-  sample_query = {
-    simple: "Shawshank",
-  }
+  puts "Query..."
+  query
+end
 
-  searcher_pool = Searcher.pool(size: 20)
-  indexer_pool  = Indexer.pool(size: 20)
+def query
+  sender = Sender.pool(size: 20)
 
-  engines.each do |engine|
-    print "#{engine.name} query... "
-    queries = engine.supported_query_types.map { |type| sample_query.fetch(type) }
-    queries.each do |query|
+  $engines.each do |engine|
+    query_times = QUERIES.each_with_object([]) do |query, query_times|
       100.times do
-        searcher_pool.async.search(engine, )
+        query_times << sender.future(:call, engine, :search, query)
       end
     end
-      query_times = 100.times.map { engine.query(sample_query, limit: 20) }
-      query_time = query_times.inject(:+)
-
-    print "#{engine.name}"
+    puts "%.2f" % query_times.map(&:value).avg
   end
 end
