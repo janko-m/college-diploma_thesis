@@ -12,7 +12,7 @@ gem "pry-stack_explorer"
 
 # Postgres
 gem "pg"
-gem "sequel"
+gem "sequel", github: "jeremyevans/sequel"
 
 # Elasticsearch
 gem "elasticsearch"
@@ -24,3 +24,7 @@ gem "rsolr"
 # Sphinx
 gem "riddle"
 gem "mysql2"
+
+# Testing
+gem "cucumber"
+gem "rspec"

@@ -3,8 +3,6 @@ require "riddle/2.1.0"
 require "mysql2"
 require "sequel"
 
-require "benchmark"
-
 class Engine
   class Sphinx < Engine
     def setup
@@ -22,15 +20,13 @@ class Engine
       movies.each_slice(1_000) do |slice|
         db[:movies].multi_insert(slice)
       end
-      controller.index(verbose: true)
+      controller.index
       controller.start
     end
 
     def search(query)
       limit = db[:movies].count
-      Benchmark.realtime do
-        sphinx_db[:movies].where("MATCH(?)", query).limit(limit).to_a
-      end * 1000
+      sphinx_db[:movies].where("MATCH(?)", query).limit(limit).to_a
     end
 
     private

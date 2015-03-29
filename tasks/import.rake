@@ -12,7 +12,6 @@ module IMDb
       unless File.exists?("data/#{name}.list")
         download_file("#{name}.list.gz", "data/#{name}.list.gz")
         unzip_file("data/#{name}.list.gz")
-        encode_file("data/#{name}.list")
       end
       File.expand_path("data/#{name}.list")
     end
@@ -20,15 +19,11 @@ module IMDb
     private
 
     def download_file(source, destination)
-      system "wget #{File.join(URL, source)} -O #{destination} --quiet --show-progress"
+      system "wget #{File.join(MIRROR, source)} -O #{destination} --quiet --show-progress"
     end
 
     def unzip_file(filename)
       system "gzip --decompress --force #{filename}"
-    end
-
-    def encode_file(filename)
-      system "vim #{filename} -c 'set fileencoding=utf-8 | write | quit'"
     end
   end
 
@@ -44,7 +39,7 @@ module IMDb
     end
 
     def extract(path, number)
-      lines = File.open(path).each_line
+      lines = File.open(path, encoding: "iso-8859-1:utf-8").each_line
       lines.next until lines.peek.start_with?("MV: ")
 
       progress_bar = TTY::ProgressBar.new(":bar :percent", total: number, width: 50, complete: "#")
