@@ -5,15 +5,15 @@ Feature: Ranking
     And I have movies
       | title                    |
       | Blue Blue Blue Red       |
-      | Blue Red Red             |
+      | Blue Blue Red Red        |
       | Blue Blue Blue Blue Blue |
-    When I enter a search query "Red AND Blue"
-    Then the first result should be "Blue Red Red"
+    When I enter a search query "Red Blue"
+    Then the first result should be "Blue Blue Red Red"
 
     Examples:
       | engine        |
       | postgres      |
-      # | elasticsearch |
+      | elasticsearch |
       # | solr          |
       # | sphinx        |
 
@@ -31,7 +31,7 @@ Feature: Ranking
     Examples:
       | engine        |
       | postgres      |
-      # | elasticsearch |
+      | elasticsearch |
       # | solr          |
       # | sphinx        |
 
@@ -47,6 +47,6 @@ Feature: Ranking
     Examples:
       | engine        |
       | postgres      |
-      # | elasticsearch |
+      | elasticsearch |
       # | solr          |
       # | sphinx        |

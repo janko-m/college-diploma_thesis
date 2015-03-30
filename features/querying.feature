@@ -7,11 +7,13 @@ Feature: Querying
       | The Green Mile |
     When I enter a search query "Mile Green"
     Then the first result should be "The Green Mile"
+    When I enter a search query "Mile Green Apple"
+    Then the results should be empty
 
     Examples:
       | engine        |
       | postgres      |
-      # | elasticsearch |
+      | elasticsearch |
       # | solr          |
       # | sphinx        |
 
@@ -26,7 +28,7 @@ Feature: Querying
     Examples:
       | engine        |
       | postgres      |
-      # | elasticsearch |
+      | elasticsearch |
       # | solr          |
       # | sphinx        |
 
@@ -41,7 +43,7 @@ Feature: Querying
     Examples:
       | engine        |
       | postgres      |
-      # | elasticsearch |
+      | elasticsearch |
       # | solr          |
       # | sphinx        |
 
@@ -58,7 +60,7 @@ Feature: Querying
     Examples:
       | engine        |
       | postgres      |
-      # | elasticsearch |
+      | elasticsearch |
       # | solr          |
       # | sphinx        |
 
@@ -86,7 +88,7 @@ Feature: Querying
     Examples:
       | engine        |
       | postgres      |
-      # | elasticsearch |
+      | elasticsearch |
       # | solr          |
       # | sphinx        |
 
@@ -104,7 +106,7 @@ Feature: Querying
     Examples:
       | engine        |
       | postgres      |
-      # | elasticsearch |
+      | elasticsearch |
       # | solr          |
       # | sphinx        |
 
@@ -127,6 +129,6 @@ Feature: Querying
     Examples:
       | engine        |
       | postgres      |
-      # | elasticsearch |
+      | elasticsearch |
       # | solr          |
       # | sphinx        |

@@ -17,6 +17,7 @@ When(/^I enter a search query "(.+)" with options "(.+)"$/) do |query, params|
 end
 
 Then(/^the first result should be "(.+)"$/) do |title|
+  expect(@results).not_to be_empty
   expect(@results.first[:title]).to eq title
 end
 

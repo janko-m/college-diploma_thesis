@@ -4,6 +4,7 @@ gem "rake"
 
 gem "celluloid"
 gem "tty-progressbar"
+gem "activesupport"
 
 gem "pry"
 gem "pry-byebug"

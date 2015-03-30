@@ -11,7 +11,7 @@ Feature: Indexing
     Examples:
       | engine        |
       | postgres      |
-      # | elasticsearch |
+      | elasticsearch |
       # | solr          |
       # | sphinx        |
 
@@ -26,7 +26,7 @@ Feature: Indexing
     Examples:
       | engine        |
       | postgres      |
-      # | elasticsearch |
+      | elasticsearch |
       # | solr          |
       # | sphinx        |
 
@@ -41,21 +41,21 @@ Feature: Indexing
     Examples:
       | engine        |
       | postgres      |
-      # | elasticsearch |
+      | elasticsearch |
       # | solr          |
       # | sphinx        |
 
   Scenario Outline: Stemming
     Given I'm using <engine>
     And I have movies
-      | title  |
-      | Octopus |
-    When I enter a search query "Octopuses"
-    Then the first result should be "Octopus"
+      | title |
+      | Chair   |
+    When I enter a search query "Chairs"
+    Then the first result should be "Chair"
 
     Examples:
       | engine        |
       | postgres      |
-      # | elasticsearch |
+      | elasticsearch |
       # | solr          |
       # | sphinx        |

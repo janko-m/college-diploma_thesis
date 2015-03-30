@@ -3,18 +3,18 @@ Feature: Displaying
   Scenario Outline: Pagination
     Given I'm using <engine>
     And I have movies
-      | title     |
-      | Blue Blue |
-      | Blue      |
+      | title      |
+      | Blue       |
+      | Blue Green |
     When I enter a search query "Blue" with options "{page: 1, per_page: 1}"
-    Then I should get results "['Blue Blue']"
-    When I enter a search query "Blue" with options "{page: 2, per_page: 1}"
     Then I should get results "['Blue']"
+    When I enter a search query "Blue" with options "{page: 2, per_page: 1}"
+    Then I should get results "['Blue Green']"
 
     Examples:
       | engine        |
       | postgres      |
-      # | elasticsearch |
+      | elasticsearch |
       # | solr          |
       # | sphinx        |
 
@@ -29,6 +29,6 @@ Feature: Displaying
     Examples:
       | engine        |
       | postgres      |
-      # | elasticsearch |
+      | elasticsearch |
       # | solr          |
       # | sphinx        |
