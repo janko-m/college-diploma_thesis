@@ -89,7 +89,7 @@ Indeksiranje za pretraživanje punog teksta može se podijeliti u tri dijela:
 
 \subsection{Preprocesiranje}
 
-Prije samog obrađivanja, potrebno je sve dokumente svesti na jednu zajedničku tekstualnu reprezentaciju. Pretpostavimo da radimo aplikaciju koja omogućuje pohranjivanje digitalnih prezentacija, koje se učitavaju u PDF formatu, i koje se onda mogu gledati online\footnote{Jedna takva aplikacija je \url{http://speakerdeck.com}.}. Htjeli bismo omogućiti da korisnici mogu pretraživati bazu svih prezentacija po ključnim riječima. Problem je što je PDF tzv \textit{binarni} format, pa nije moguće samo pretraživati sadržaj datoteke. Stoga je potrebno danu PDF datoteku najprije svesti na neki format koje je pogodan za pretraživanje. Taj proces pretvaranja više vrsta datoteka u jednu zajedničku tekstualnu reprezentaciju zove se \textit{preprocesiranje}\footnote{\cite{taming} str. 32}.
+Prije samog obrađivanja, potrebno je sve dokumente svesti na jednu zajedničku tekstualnu reprezentaciju. Pretpostavimo da radimo aplikaciju koja omogućuje pohranjivanje digitalnih prezentacija, koje se učitavaju u PDF formatu, i koje se onda mogu gledati online (jedna takva aplikacija je \url{http://speakerdeck.com}). Htjeli bismo omogućiti da korisnici mogu pretraživati bazu svih prezentacija po ključnim riječima. Problem je što je PDF tzv \textit{binarni} format, pa nije moguće samo pretraživati sadržaj datoteke. Stoga je potrebno danu PDF datoteku najprije svesti na neki format koje je pogodan za pretraživanje. Taj proces pretvaranja više vrsta datoteka u jednu zajedničku tekstualnu reprezentaciju zove se \textit{preprocesiranje} (\cite{taming} str. 32).
 
 Neki od češćih formata datoteki mogu se vidjeti na slici \ref{formats}.
 
@@ -120,15 +120,29 @@ Neki od češćih formata datoteki mogu se vidjeti na slici \ref{formats}.
 \end{figure}
 }
 
-Jedan popularan softver otvorenog koda za izdvajanje teksta iz različitih tipova datoteki je Apache Tika\footnote{\url{http://tika.apache.org}}.
+Jedan popularan softver otvorenog koda za izdvajanje teksta iz različitih tipova datoteki je Apache Tika (\url{http://tika.apache.org}).
 
 \subsection{Analiza}
 
 Nakon što smo sve dokumente sveli na zajednički tekstualni format, moguće je obraditi dokumente na način koji će omogućiti tražilici da ima više značajki, a istovremeno ubrzati samo vrijeme izvršavanja upita.
 
+\subsubsection{Detekcija rečenica}
+
+Na početku same analize teksta, potrebno je radvojiti tekst u rečenice. Kada tražilica ne bi znala gdje završavaju rečenice, za frazni upit ``pobjednik Ivica Kostelić'' bi mogla vratiti dokument u kojem se pojavljuje:
+
+\begin{quoting}
+  \textit{Prvo mjesto svjetskog skijaškog kupa odnosi novi \underline{pobjednik. Ivica Kostelić}, nažalost, osvojio je 25. mjesto u prvoj vožnji i nosi porazno zadnje mjesto.}
+\end{quoting}
+
+Dok se riječi \textit{pobjednik}, \textit{Ivica} i \textit{Kostelić} u ovom tekstu tehnički pojavljuju jedna za drugom, znamo da ne odgovaraju fraznom upitu zbog toga što nakon \textit{pobjednik} završava rečenica.
+
+Međutim, pravilno detektirati rečenice je teže nego što izgleda. To je zato što pojava interpunkcijskog znaka ne označava uvijek kraj rečenice. Točka može biti dio rednog broja (\textit{25.}) ili dio skraćenice (\textit{tj.}). Točka, upitnik i uskličnik koji se pojavljuju unutar navodnika ne označavaju kraj rečenice.
+
+Popularna biblioteka otvorenog koda za detektiranje rečenica (i za sve ostale stvari vezane uz obradu prirodnog teksta) je OpenNLP (\url{https://opennlp.apache.org}).
+
 \subsubsection{Tokenizacija}
 
-Pretraživanje dokumenata svodi se na ispitivanje u kojim se dokumentima pojavljuju ključne riječi unešene u polje za pretraživanje. Svaki dokument se stoga rastavlja na ``riječi'', tzv \textit{tokene}, tako da se onda pretraživanje dokumenata može ugrubo svesti na traženje ključnih riječi u listi tokena.
+Pretraživanje dokumenata svodi se na ispitivanje u kojim se dokumentima pojavljuju ključne riječi unešene u polje za pretraživanje. Nakon rastavljanja teksta na rečenice, svaka rečenica se zatim rastavlja na riječi, tzv \textit{tokene}. Sada se pretraživanje dokumenata može ugrubo svesti na traženje ključnih riječi u listi tokena.
 
 Međutim, sama tokenizacija nije tako trivijalan zadatak. Pretpostavimo da trebamo tokenizirati sljedeći tekst:
 
@@ -152,13 +166,7 @@ Dok ovaj pristup funkcionira u nekim slučajevima, primijetimo da se kod našeg 
   \end{tabular}
 \end{nscenter}
 
-Dok ovaj tokenizator riješava problem lijepljenja interpunkcijskih znakova za tokene, činjenica da su odstranjeni svi interpunkcijski znakovi stvara novi problem. Pretpostavimo da korisnik pretražuje sve dokumente gdje se pojavljuje fraza ``pobjednik Ivica Kostelić'', i naiđe na sljedeći tekst:
-
-\begin{quoting}
-  \textit{Prvo mjesto svjetskog skijaškog kupa odnosi novi pobjednik. Ivica Kostelić, nažalost, osvojio je 25. mjesto u prvoj vožnji i nosi porazno zadnje mjesto.}
-\end{quoting}
-
-Ukoliko gledamo strogo koji tokeni se pojavljuju zajedno, fraza ``pobjednik Ivica Kostelić'' bi bila pronađena u ovom tesktu. Ali mi znamo da to ne bi trebalo biti tako, zbog točke nakon ``pobjednik''. Promotrimo zato tokenizator \textit{C} koji odvaja tokene po vrsti znaka: slovo, broj, interpunkcija itd:
+Dok ovaj tokenizator rješava problem lijepljenja interpunkcijskih znakova za tokene, mi još uvijek želimo zadržati interpunkcijske znakove. Promotrimo zato tokenizator \textit{C} koji odvaja tokene po vrsti znaka: slovo, broj, interpunkcija itd:
 
 \begin{nscenter}
   \begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|c|}
@@ -166,19 +174,19 @@ Ukoliko gledamo strogo koji tokeni se pojavljuju zajedno, fraza ``pobjednik Ivic
   \end{tabular}
 \end{nscenter}
 
-Ovdje sve izgleda dobro, riječi su pravilno odvojene, i očuvani su interpunkcijski znakovi. Ovaj pristup također sadrži dodatnu značajku da sada korisnik može upisati ključnu riječ ``1900'' u polje za pretraživanje, i pretraga će pronaći ovaj tekst.
+Vidimo da su riječi pravilno odvojene, i očuvani su interpunkcijski znakovi. Ovaj pristup također daje dodatnu značajku da sada korisnik može pronaći ovaj tekst upitom ``1900'' (jer sada je ``1900'' zaseban token).
 
 \subsubsection{Normalizacija veličine slova}
 
 U većini aplikacija korisnicima nije važno da dokumenti koje pokušavaju naći sadrže unešene ključne riječi točno jednake veličine. Na primjer, za ključnu riječ ``jabuka'' bi u većini slučajeva imalo smisla da rezultat pretraživanja također uključuje i dokumente koji sadrže riječ ``Jabuka''. Štoviše, kada bi se veličina slova uzimala u obzir, ako bi korisnik htio naći sve dokumente koji sadrže riječ ``jabuka'' bilo na početku ili na kraju rečenice, morao bi proširiti upit na ``jabuka Jabuka''.
 
-Zato se najčešće svim tokenima po konvenciji\footnote{Nije bitno koje su veličine slova, važno je samo da su sva iste veličine} velika slova pretvaraju u mala, čime se efektivno normalizira veličina slova.
+Zato se najčešće svim tokenima po konvenciji velika slova pretvaraju u mala, čime se efektivno normalizira veličina slova.
 
 \subsubsection{Eliminacija stop-riječi}
 
-\textit{Stop}-riječi su česte riječi poput ``i'', ``ako'' i ``onda''\footnote{U hrvatskom jeziku možemo sve veznike i prijedloge smatrati stop-riječima} koje najčešće nemaju vrijednost za aplikaciju. Na primjer, ako korisnik unese upit ``jabuke i kruške'', a ne postoji niti jedan dokument u bazi podataka koji sadrži riječ ``kruška'' ili ``jabuka'', najčešće ne bi imalo smisla da tražilica onda vrati sve dokumente koji sadrže riječ ``i''.
+\textit{Stop}-riječi su česte riječi poput ``i'', ``ako'' i ``onda'' (u hrvatskom jeziku možemo sve veznike i prijedloge smatrati stop-riječima) koje najčešće nemaju vrijednost za aplikaciju. Na primjer, ako korisnik unese upit ``jabuke i kruške'', a ne postoji niti jedan dokument u bazi podataka koji sadrži riječ ``kruška'' ili ``jabuka'', najčešće ne bi imalo smisla da tražilica onda vrati sve dokumente koji sadrže riječ ``i''.
 
-Iz tog razloga se stop-riječi često izbacuju iz liste tokena. To rezultira i bržim pretraživanjem, jer sada tražilica ima manji broj tokena koje mora pretraživati. Da tražilica može detektirati stop-riječi, potreban joj je digitalni rječnik\footnote{Za najraširenije jezike postoje besplatni online rječnici na \url{http://snowball.tartarus.org}}.
+Iz tog razloga se stop-riječi često izbacuju iz liste tokena. To rezultira i bržim pretraživanjem, jer sada tražilica ima manji broj tokena koje mora pretraživati. Da tražilica može detektirati stop-riječi, potreban joj je digitalni rječnik. Za najraširenije jezike postoje besplatni online rječnici na \url{http://snowball.tartarus.org}.
 
 \subsubsection{Normalizacija dijakritičkih znakova}
 
@@ -198,9 +206,9 @@ S tom promjenom korisnici mogu koristiti pojednostavljene verzije riječi u svom
 
 Pretpostavimo da korisnik želi naći sve dokumente vezane uz banke. Budući da ne zna u kojem obliku i padežu se pojavljuje ta riječ, korisnik bi morao upisivati u tražilicu ``banka banke banci ... banke bankama ... bankarstvo bankarstva ...''. Ovakvo korisničko iskustvo očito nije prihvatljivo; korisnik bi trebao samo upisati riječ ``banka'', i time pretražiti sve varijacije te riječi.
 
-\textit{Korjenovanje} (eng. \textit{stemming}) je proces reduciranja riječi na njen korijen, ili jednostavniji oblik koji sam po sebi ne mora biti riječ\footnote{\cite{taming} str. 25}. Ono omogućuje korisniku da upiše jednu riječ, i dobije natrag sve dokumente koji sadrže bilo koju varijaciju te riječi. Kao i za stop-riječi, za korjenovanje je također potreban digitalni riječnik.
+\textit{Korjenovanje} (eng. \textit{stemming}) je proces reduciranja riječi na njen korijen, ili jednostavniji oblik koji sam po sebi ne mora biti riječ (\cite{taming} str. 25). Ono omogućuje korisniku da upiše jednu riječ, i dobije natrag sve dokumente koji sadrže bilo koju varijaciju te riječi. Kao i za stop-riječi, za korjenovanje je također potreban digitalni rječnik.
 
-Postoje razni stupnjevi korjenovanja; neki su agresivniji, reducirajući riječi na najmanji mogući korijen, dok su drugi blaži, preferirajući samo osnovnije promjene kao odstranjivanje nastavaka broja i padeža. Svaka aplikacija odabire svoj stupanj korjenovanja, ovisno o željenom omjeru kvalitete i kvantitete. Agresivnije korjenovanje uglavnom vode ka više rezultata ali manjoj kvaliteti, dok blaže korjenovanje može očuvati razinu kvalitete ali uz rizik da neće biti vraćeni neki korisni rezultati. Korjenovanje može uzrokovati probleme gdje se riječi s drukčijim značenjem reduciraju na isti korijen, ili riječi koje su povezane ne reduciraju na isti korijen\footnote{\cite{taming} str. 26}.
+Postoje razni stupnjevi korjenovanja; neki su agresivniji, reducirajući riječi na najmanji mogući korijen, dok su drugi blaži, preferirajući samo osnovnije promjene kao odstranjivanje nastavaka broja i padeža. Svaka aplikacija odabire svoj stupanj korjenovanja, ovisno o željenom omjeru kvalitete i kvantitete. Agresivnije korjenovanje uglavnom vode ka više rezultata ali manjoj kvaliteti, dok blaže korjenovanje može očuvati razinu kvalitete ali uz rizik da neće biti vraćeni neki korisni rezultati. Korjenovanje može uzrokovati probleme gdje se riječi s drukčijim značenjem reduciraju na isti korijen, ili riječi koje su povezane ne reduciraju na isti korijen (\cite{taming} str. 26).
 
 Aplikacije mogu najprije početi sa blažim korjenovanjem, pa ga napraviti agresivnijim ukoliko se primjeti da je često vraćeno premalo rezultata. Kao i za eliminaciju stop-riječi, za korjenovanje je također potreban digitalni rječnik.
 
@@ -246,14 +254,14 @@ Pri unosu upita, često se mogu pojaviti zatipci (eng. \textit{typographical err
 
 Zato je uobičajeno da tražilica tolerira određeni stupanj ``greške'' u unosu. Ukoliko tražilica ne pronađe danu riječ u indeksu, ona pokuša pronaći dokumente sa riječima koje su ``slične'' riječi iz upita. Neke tražilice čak idu dalje i u slučaju velike sigurnosti ponude korisniku ispravljenu riječ.
 
-Spomenuli smo pojam međusobne ``sličnosti'' riječi, ali nismo definirali kako se to izračunava. Ovdje je opet od velike pomoći promatranje \textit{n}-grama. Ranije smo radili s \textit{n}-gramima na razini riječi, ali ovaj puta promatramo \textit{n}-grame na razini slova. Najbolja mjera za sličnost dviju riječi je broj njihovih zajedničkih \textit{n}-grama\footnote{\cite{taming} str. 99}, konkretnije trigrama\footnote{\url{http://www.postgresql.org/docs/9.4/static/pgtrgm.html}}.
+Spomenuli smo pojam međusobne ``sličnosti'' riječi, ali nismo definirali kako se to izračunava. Ovdje je opet od velike pomoći promatranje \textit{n}-grama. Ranije smo radili s \textit{n}-gramima na razini riječi, ali ovaj puta promatramo \textit{n}-grame na razini slova. Najbolja mjera za sličnost dviju riječi je broj njihovih zajedničkih \textit{n}-grama (\cite{taming} str. 99), konkretnije trigrama\footnote{\url{http://www.postgresql.org/docs/9.4/static/pgtrgm.html}}.
 
 
 \subsection{Fraze}
 
 Pretpostavimo da radimo aplikaciju koja omogućuje korisnicima da gledaju riječi pjesama. Pretpostavimo sada da korisnik želi iskoristiti tu aplikaciju da pronađe naziv i autora pjesme na temelju fraza koje je zapamtio iz slušanja te pjesme. Ako korisnik upiše te fraze iz pjesme kao običan niz ključnih riječi, postoji vjerojatnost da će rezultati uključivati i druge pjesme koje sadrže te ključne riječi, i možda pjesma koju korisnik traži neće biti na prvom mjestu. S druge strane, kada bi korisnik mogao reći tražilici da se određeni nizovi riječi iz upita nalaze u dokumentima točno tim redoslijedom, broj vraćenih pjesama se može znatno smanjiti (jer je puno manja vjerojatnost da dvije pjesme dijele čitavu frazu nego par individualnih riječi), i puno je vjerojatnije da će tražena pjesma biti prvi rezultat.
 
-Niz ključnih riječi može se označiti kao fraza tako da se omeđi dvostrukim navodnicima (slika \ref{phrases}). Tražilica pretražuje dokumente za frazu pomoću tzv \textit{n}-grama\footnote{\textit{n}-gram je bilo koji \textit{n}-člani podniz uzastopnih elemenata nekog niza.}. Radi brzine se najprije s manjim \textit{n}-gramima odredi na kojim mjestima je najvjerojatnije da se fraza nalazi, i zatim se ispituju zabilježena mjesta\footnote{\cite{taming} str. 31}.
+Niz ključnih riječi može se označiti kao fraza tako da se omeđi dvostrukim navodnicima (slika \ref{phrases}). Tražilica pretražuje dokumente za frazu pomoću tzv \textit{n}-grama. \textit{n}-gram je bilo koji \textit{n}-člani podniz uzastopnih elemenata nekog niza. Radi brzine se najprije s manjim \textit{n}-gramima odredi na kojim mjestima je najvjerojatnije da se fraza nalazi, i zatim se ispituju zabilježena mjesta (\cite{taming} str. 31).
 
 \begin{figure}[H]
   \centering
@@ -286,7 +294,7 @@ Naprednijim korisnicima trebalo bi omogućiti maksimalnu preciznost pretraživan
   \label{wildcards}
 \end{figure}
 
-Dok su ova 2 zamjenska znakova daju kontrolu dovoljnu u većini slučajeva, postoje neki (rijetki) slučajevi u kojima je potrebna veća preciznost (npr. pretraživanje programskog kôda). Zato neke tražilice u upitu omogućuju i korištenje regularnih izraza\footnote{\url{http://en.wikipedia.org/wiki/Regular_expression}}.
+Dok su ova 2 zamjenska znakova daju kontrolu dovoljnu u većini slučajeva, postoje neki (rijetki) slučajevi u kojima je potrebna veća preciznost (npr. pretraživanje programskog kôda). Zato neke tražilice u upitu omogućuju i korištenje regularnih izraza.
 
 \subsection{Specificiranje polja}
 
@@ -333,11 +341,11 @@ Dok korisnik upisuje znakove u polje za upit, aplikacije često otvaraju listu s
   \label{typeahead}
 \end{figure}
 
-Lista sugestija se najčešće dobavlja korištenjem \textit{n}-grama, na sličan način kao kod ispravljanja zatipaka. Najprije se dobavljaju riječi koje sadrže barem jedan zajednički \textit{n}-gram s upitom, a zatim se ta lista rangira po broju zajedničkih \textit{n}-grama\footnote{\cite{taming} str. 100}.
+Lista sugestija se najčešće dobavlja korištenjem \textit{n}-grama, na sličan način kao kod ispravljanja zatipaka. Najprije se dobavljaju riječi koje sadrže barem jedan zajednički \textit{n}-gram s upitom, a zatim se ta lista rangira po broju zajedničkih \textit{n}-grama (\cite{taming} str. 100).
 
 \section{Rangiranje}
 
-Kada tražilica pretražuje sve dokumente koji ispunjavaju dani upit, potrebno je odrediti koliko je neki dokument ``relevantan'' upitu. Iako je tražilicama obično moguće proslijediti opciju sortiranja rezultata po nekom kriteriju (npr. alfabetično ili po cijeni), odsustvo te opcije podrazumijeva da tražilica vraća rezultate sortirane po ``relevantnosti''.
+Kada tražilica pretražuje sve dokumente koji ispunjavaju dani upit, potrebno je odrediti koliko je neki dokument ``relevantan'' upitu. Iako je tražilicama obično moguće proslijediti opciju sortiranja rezultata po nekom kriteriju (npr. alfabetski ili po cijeni), odsustvo te opcije podrazumijeva da tražilica vraća rezultate sortirane po ``relevantnosti''.
 
 \subsection{Model vektorskog polja}
 
@@ -410,7 +418,7 @@ Ukoliko je broj dokumenata velik, aplikacija najčešće ne želi odmah prikazat
   \label{pagination}
 \end{figure}
 
-Osim vremena učitavanja web stranice, paginacijom također smanjujemo vrijeme koje treba tražilici da pronađe rezultate, budući da tražilica ne treba vratiti sve dokumente koji ispunjavaju upit, nego samo nekoliko.
+Budući da tražilica najprije mora izračunati relevantnost svih dokumenata, kako bi ih mogla sortirati i vratiti traženi prozor, paginacija najčešće ne ubrzava vrijeme upita direktno. Međutim, ako je ukupni broj dokumenata vrlo velik, paginacijom je moguće znatno smanjiti količinu memorije potrebne za izvršenje upita. Također, ukoliko se upit izvršava preko Interneta, manji broj dokumenata koje tražilica vraća će rezultirati bržim izvršenjem cijelog HTTP zahtjeva, jer se preko mreže treba prenijeti manja količina podataka.
 
 \subsection{Isticanje}
 
@@ -431,7 +439,7 @@ U prethodnom poglavlju smo obradili sve glavne značajke koje tražilice mogu im
 
 \subsection{Apache Lucene}
 
-\textit{Apache Lucene} je programska biblioteka sa funkcionalnostima za pretraživanje punog teskta, napisana u Javi i javno distribuirana pod licencom ``Apache License 2.0''. Lucene nije potpuna aplikacija za pretraživanje, već pruža sučelje za to na nižoj razini, kroz Java API\footnote{eng. \textit{application programming interface}}.
+\textit{Apache Lucene} je programska biblioteka sa funkcionalnostima za pretraživanje punog teskta, napisana u Javi i javno distribuirana pod licencom ``Apache License 2.0''. Lucene nije potpuna aplikacija za pretraživanje, već pruža sučelje za to na nižoj razini, kroz Java API (eng. \textit{Application Programming Interface}).
 
 Glavne značajke Apache Lucene uključuju:
 
@@ -468,7 +476,7 @@ Osim značajki koje uzima iz Apache Lucene, Solr ima i mnogo dodatnih sposobnost
   \item nativna podrška za upravljanje valutama (npr. određivanje valute iz simbola i automatske konverzije) itd.
 \end{itemize}
 
-Neke od poznatijih organizacija koje koriste Apache Solr su AT\&T, eBay, Netflix i Disney\footnote{\url{http://lucene.apache.org/solr/}}
+Neke od poznatijih organizacija koje koriste Apache Solr su AT\&T, eBay, Netflix i Disney (uzeto s \url{http://lucene.apache.org/solr/}).
 
 \subsection{Sphinx}
 
@@ -492,10 +500,10 @@ Neke od glavnih značajki Sphinx-a uključuju:
   \item vrlo napredno i potpuno konfigurabilno rangiranje na principu dodavanja faktora (blizina riječi, TF-IDF itd)
   \item sortiranje po relevantnosti ili poljima
   \item grupiranje (eng. \textit{clustering}) rezultata
-  \item CLI\footnote{eng. \textit{command-line interface}} za upravljanje bazom
+  \item CLI (eng. \textit{Command-Line Interface}) za upravljanje bazom
 \end{itemize}
 
-Neke od poznatijih organizacija koje koriste Sphinx su Tumblr i CouchSurfing\footnote{\url{http://sphinxsearch.com/info/powered/}}.
+Neke od poznatijih organizacija koje koriste Sphinx su Tumblr i CouchSurfing (uzeto s \url{http://sphinxsearch.com/info/powered/}).
 
 \subsection{PostgreSQL}
 
@@ -514,7 +522,7 @@ Neke glavne značajke i prednosti korištenja PostgreSQL-a vezane za pretraživa
 
 \subsection{Elasticsearch}
 
-Elasticsearch je distribuirana platforma za pretraživanje punog teksta i analitiku u realnom vremenu, sagrađena na Apache Lucene. Napisana je u Javi i javno distribuirana pod licencom "Apache License 2.0". Elasticsearch je \textit{dokumentno-orijentirana} baza podataka, što spada u NoSQL\footnote{\url{http://en.wikipedia.org/wiki/NoSQL}} tipove baza. Slika \ref{elasticsearch} ilustrira analogiju između elemenata Elasticsearch-a i relacijskih baza.
+Elasticsearch je distribuirana platforma za pretraživanje punog teksta i analitiku u realnom vremenu, sagrađena na Apache Lucene. Napisana je u Javi i javno distribuirana pod licencom "Apache License 2.0". Elasticsearch je \textit{dokumentno-orijentirana} baza podataka, što spada u tzv \textit{NoSQL} tipove baza (naziv dolazi iz činjenice da se s takvim bazama ne komunicira SQL jezikom). Slika \ref{elasticsearch} ilustrira analogiju između elemenata Elasticsearch-a i relacijskih baza.
 
 \begin{figure}[H]
   \centering
@@ -539,7 +547,7 @@ Neke od glavnih značajki Elasticsearch-a uključuju:
 
 \begin{itemize}
   \item automatska distribuiranost
-  \item jednostavan HTTP API (slijedi konvencije REST-a\footnote{\url{http://www.ics.uci.edu/~fielding/pubs/dissertation/top.htm}})
+  \item jednostavan HTTP API
   \item nativni Java API
   \item kontrola paralelnih zahtjeva
   \item napredna introspekcija (npr. uvid zašto dokument je/nije pronađen)
@@ -548,7 +556,7 @@ Neke od glavnih značajki Elasticsearch-a uključuju:
   \item podrška za geolokacije
 \end{itemize}
 
-Neke od poznatijih organizacija koje koriste Elasticsearch su Wikipedia, The Guardian, Stack Overflow i GitHub\footnote{\cite{elastic} na \url{http://www.elasticsearch.org/guide/en/elasticsearch/guide/current/getting-started.html}}.
+Neke od poznatijih organizacija koje koriste Elasticsearch su Wikipedia, The Guardian, Stack Overflow i GitHub (uzeto iz \cite{elastic} na \url{http://www.elasticsearch.org/guide/en/elasticsearch/guide/current/getting-started.html}).
 
 \section{Aplikacija}
 
@@ -577,7 +585,7 @@ Dok nadogradnja jednog računala može puno pomoći, performanse koje se mogu po
 \end{compactenum}
 
 \begin{thebibliography}{99}
-  \bibitem{taming} G. S. Ingersoll, T. S. Morton, A. L. Farris, \textit{Taming Text: How to Find, Organize, and Manipulate It}, Manning Publications Co, Zagreb, 2013.
+  \bibitem{taming} G. S. Ingersoll, T. S. Morton, A. L. Farris, \textit{Taming Text: How to Find, Organize, and Manipulate It}, Manning Publications Co, New York, 2013.
   \bibitem{lucene} \url{http://lucene.apache.org/core/4_10_3/} (siječanj, 2015)
   \bibitem{solr} \url{http://ftp.carnet.hr/misc/apache/lucene/solr/ref-guide/apache-solr-ref-guide-4.10.pdf} (siječanj, 2015)
   \bibitem{sphinx} \url{http://sphinxsearch.com/docs/latest/index.html} (siječanj, 2015)
