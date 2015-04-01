@@ -9,7 +9,7 @@ class Engine
     end
 
     def clear
-      client.indices.delete_mapping index: "diploma", type: "movie"
+      client.delete_by_query index: "diploma", type: "movie", q: "*"
     end
 
     def import(movies)

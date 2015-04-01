@@ -59,11 +59,11 @@ Bez mogućnosti kvalitetnog pretraživanja korisnik najčešće neće moći pron
 
 Budući da se informacije obično sastoje od velikih količina teksta, u ovom radu ćemo se orijentirati na tzv \textit{pretraživanje punog teskta} (eng. \textit{full-text search}). Za kvalitetno pretraživanje punog teksta, nažalost, općenito nisu dovoljne klasične relacijske baze podataka (MySQL, PostgreSQL, Oracle). Dok su takve baze podataka vrlo efikasne za pretraživanje po diskretnim vrijednostima polja, one obično manjkaju sposobnosti kada treba odrediti koliko neki dokument ispunjava neki tekstualnom upitu. Točnije ne znaju efikasno odrediti koja polja dokumenta ispunjavaju koji dio upita (koji se sastoji od običnog niza znakova), i tako odrediti koliko je taj dokument relevantan upitu. Iako klasične baze podataka podržavaju regularne izraze, kvalitetno pretraživanje punog teksta zahtijeva više od jednostavnog uspoređivanja znakova. Takva tražilica treba moći unaprijed obraditi tekst da maksimalno ubrza vrijeme izvršavanja upita. Ona treba moći zanemariti eventualne zatipke (eng. \textit{typo}) korisnika, i ne ograničavati se na specifične padeže i veličine slova. Konačno, ona treba vratiti rezultate rangirane po relevantnosti. U sljedećem poglavlju obradit ćemo glavne značajke koje tražilice punog teskta trebaju imati.
 
-Aplikacija, da može pružiti svojim korisnicima mogućnost pretraživanja, može izabrati ili sama implementirati svoju tražilicu, ili koristiti jedan od već postojećih softvera. Budući da je danas kvaliteta javno dostupnih tražilica dosegla razinu gdje je dovoljna za vodeće svjetske aplikacije, nema razloga ne odlučiti se za potonju opciju. U radu ću spomenuti i obraditi sve vodeće softvere za pretraživanje, ali isključivo one otvorenog koda (eng. \textit{open source}). Naime, tražilice otvorenog koda su se pokazale da izvrsno funkcioniraju i za svjetski popularne aplikacije (npr. Wikipedia), pa obično nema razloga za korištenje komercijalnih.
+Aplikacija, da može pružiti svojim korisnicima mogućnost pretraživanja, može izabrati ili sama implementirati svoju tražilicu, ili koristiti jedan od već postojećih softvera. Budući da je danas kvaliteta javno dostupnih tražilica dosegla razinu gdje je dovoljna za vodeće svjetske aplikacije, nema razloga ne odlučiti se za potonju opciju. U radu ću spomenuti i obraditi sve vodeće softvere za pretraživanje, ali isključivo one otvorenog kôda (eng. \textit{open source}). Naime, tražilice otvorenog kôda su se pokazale da izvrsno funkcioniraju i za svjetski popularne aplikacije (npr. Wikipedia), pa obično nema razloga za korištenje komercijalnih.
 
-Za praktični dio rada izradit ću vlastitu web aplikaciju u kojoj ću implementirati pretraživanje određene količine dokumenata koristeći svaku od vodećih tražilica. Cilj praktičnog dijela je usporedba vodećih tražilica u aspektima brzine pretraživanja i jednostavnosti korištenja.
+Praktični dio ovog rada sastojat će se implementacije pretraživanja u svakoj od vodećih tražilica punog teksta. Program će testirati koje sve značajke obrađene u sljedećem poglavlju podržava pojedina tražilica. Pisanje tog programa će mi dati i bolje razumijevanje svake tražilice, te ću uz pomoć tog znanja iznijeti glavne prednosti i nedostatke, i zaključiti koji softver je trenutno najbolji.
 
-\chapter{Pretraživanje}
+\chapter{Pretraživanje} \label{searching}
 
 U ovom poglavlju obradit ćemo sve glavne elemente koje čine tražilicu punog teksta. Proces pretraživanja može se opisati u četiri dijela:
 
@@ -120,7 +120,7 @@ Neki od češćih formata datoteki mogu se vidjeti na slici \ref{formats}.
 \end{figure}
 }
 
-Jedan popularan softver otvorenog koda za izdvajanje teksta iz različitih tipova datoteki je Apache Tika (\url{http://tika.apache.org}).
+Jedan popularan softver otvorenog kôda za izdvajanje teksta iz različitih tipova datoteki je Apache Tika (\url{http://tika.apache.org}).
 
 \subsection{Analiza}
 
@@ -136,9 +136,9 @@ Na početku same analize teksta, potrebno je radvojiti tekst u rečenice. Kada t
 
 Dok se riječi \textit{pobjednik}, \textit{Ivica} i \textit{Kostelić} u ovom tekstu tehnički pojavljuju jedna za drugom, znamo da ne odgovaraju fraznom upitu zbog toga što nakon \textit{pobjednik} završava rečenica.
 
-Međutim, pravilno detektirati rečenice je teže nego što izgleda. To je zato što pojava interpunkcijskog znaka ne označava uvijek kraj rečenice. Točka može biti dio rednog broja (\textit{25.}) ili dio skraćenice (\textit{tj.}). Točka, upitnik i uskličnik koji se pojavljuju unutar navodnika ne označavaju kraj rečenice.
+Međutim, pravilno detektirati rečenice je teže nego što izgleda. To je zato što pojava interpunkcijskog znaka ne označava uvijek kraj rečenice. Točka može biti dio rednog broja (\textit{25.}) ili dio skraćenice (\textit{tj.}). Točka, upitnik i uskličnik koji se pojavljuju unutar navodnika (npr. kod direktnog govora) ne označavaju kraj rečenice.
 
-Popularna biblioteka otvorenog koda za detektiranje rečenica (i za sve ostale stvari vezane uz obradu prirodnog teksta) je OpenNLP (\url{https://opennlp.apache.org}).
+Popularna biblioteka otvorenog kôda za detektiranje rečenica (i za sve ostale stvari vezane uz obradu prirodnog teksta) je OpenNLP (\url{https://opennlp.apache.org}).
 
 \subsubsection{Tokenizacija}
 
@@ -431,11 +431,40 @@ Mnogo aplikacija, osim vraćenih rezultata, žele prikazati i zašto je pojedini
   \label{highlighting}
 \end{figure}
 
+\chapter{Skaliranje}
+
+Kada gradimo aplikaciju za pretraživanje, s vremenom se broj dokumenata i broj korisnika može znatno povećati. To znači da se performanse pretraživanja mogu znatno smanjiti. Postoje razni aspekti koje možemo mjeriti da dobijemo uvid u brzinu pretraživanja:
+
+\begin{compactitem}
+  \item \textbf{Propusnost upita} – Broj upita koji sustav može obraditi u nekoj vremenskoj jedinici (npr. broj upita po sekundi).
+  \item \textbf{Prosječna brzina upita} – Vrijeme koje prosječnom upitu treba da se obradi.
+  \item \textbf{Statistike predmemorije} – Mnogi sistemi spremaju rezultate upita u predmemoriju (eng. \textit{cache}), i korisno je znati koliko se puta predmemorija iskoristila. Ako je predmemorija vrlo rijetko iskorištena, onda može biti brže isključiti predmemoriju.
+  \item \textbf{Veličina indeksa} – Veličina indeksa je obično proporcionalna s vremenom upita.
+\end{compactitem}
+
+Prirodan način za ubrzati bilo koji računalni rad je nadogradnja hardvera. To znači da se vrijeme pretraživanja može ubrzati nadogradnjom RAM-a i procesora. Također, upotreba SSD-a (eng. \textit{solid state drive}) može znatno ubrzati vrijeme upita, iako može usporiti ažuriranje dokumenata.
+
+Dok nadogradnja jednog računala može puno pomoći, performanse koje se mogu postići jednim računalom su svejedno ograničene. U jednom trenutku je potrebno distribuirati tražilicu na više računala (tzv \textit{skaliranje}). Tražilice punog teksta podržavaju dvije metode skaliranja:
+
+\begin{compactenum}
+  \item \textit{Replikacija} – Jedan indeks koji stane na jedno računalo se može kopirati na više računala. Na taj način se opterećenje može distribuirati po više računala. To je vrlo korisno kada je indeks relativno mali, ali je broj upita vrlo velik.
+  \item \textit{Cijepanje} – Jedan indeks se može rascijepati u više dijelova (eng. \textit{shards}), i svaki dio se stavlja na zasebno računalo. Cijepanje indeksa obično internalno izvršava tražilica, ali moguće indeks rascijepati i po logičnom pravilu (npr. po govornom jeziku).
+\end{compactenum}
+
 \chapter{Implementacija}
 
-U prethodnom poglavlju smo obradili sve glavne značajke koje tražilice mogu imati, a u ovom poglavlju ću napraviti uvod za praktični dio ovog rada. Praktično dio će se sastojati od implementacije pretraživanja koristeći svaku od vodećih tražilica punog teksta (koja je otvorenog koda). Najprije ću navesti i opisati svaki softver koji će se koristiti, a zatim ću opisati samu aplikaciju za pretraživanje u kojoj ću koristiti svaki softver. Cilj praktičnog dijela je primjeniti vodeće softvere na stvarnu bazu podataka, i usporediti ih na razini brzine i jednostavnosti korištenja.
+Prehodna poglavlja obradila su sve glavne značajke koje bi tražilice trebale imati. Praktični dio ovog rada sastoji se od implementacije tih značajki u svakoj od vodećih tražilica punog teksta, u području softvera otvorenog kôda. Cilj praktičnog dijela je steći znanje o funkcionalnosti svake tražilice kroz direktno iskustvo, te na temelju toga iznijeti prednosti i nedostatke svake tražilice.
 
-\section{Softveri}
+Kôd praktičnog dijela napisan je u programskom jeziku Ruby, i nalazi se na \url{https://github.com/janko-m/college-diploma_thesis}. Projekt se sastoji od:
+
+\begin{compactenum}
+  \item unificirane implementacije pretraživanja za svaku tražilicu, koja se nalazi u "lib/" direktoriju, i
+  \item automatiziranih testova koji za svaku tražilicu testiraju sve značajke iz poglavlja \ref{searching}, koji se nalaze u "features/" direktoriju.
+\end{compactenum}
+
+\section{Tražilice}
+
+U ovom podpoglavlju navest ću sve tražilice punog teksta koje sam koristio u praktičnom dijelu. Za svaku tražilicu ću najprije dati kratki opis, te ću zatim navesti njihove glavne prednosti i nedostatke.
 
 \subsection{Apache Lucene}
 
@@ -452,7 +481,9 @@ Glavne značajke Apache Lucene uključuju:
   \item ispravljanje zatipaka
 \end{itemize}
 
-Sa višeg nivoa, Lucene se koristi na sljedeći način. Prvo se inicijaliziraju dokumenti koji mogu imati jedno ili više polja. Zatim se specificira analizator dokumenata, koji će tokenizirati dokumente po poljima (ne mora se nužno koristiti analizator koji dolazi s Apache Lucene), kodek koji će kodirati i dekodirati iz invertiranog indeksa, i način kako će se indeks spremati (na disku, u memoriji itd). Nakon toga se može napraviti upit, koji prvo prolazi kroz razne analizatore (fraze, booleovi operatori itd), nakon čega se uspoređuje s indeksom, i rezultira pronađenim dokumentima.
+Lucene ugrubo funkcionira na sljedeći način. Prvo se inicijaliziraju dokumenti koji mogu imati jedno ili više polja. Zatim se specificira analizator dokumenata, koji će tokenizirati dokumente po poljima (ne mora se nužno koristiti analizator koji dolazi s Apache Lucene), kodek koji će kodirati i dekodirati iz invertiranog indeksa, i način kako će se indeks spremati (na disku, u memoriji itd). Nakon toga se može napraviti upit, koji prvo prolazi kroz razne analizatore (fraze, booleovi operatori itd), nakon čega se uspoređuje s indeksom, i rezultira pronađenim dokumentima.
+
+Apache Lucene nije bio korišten direktno u praktičnom dijelu, ali ga internalno koriste Apache Solr i Elasticsearch.
 
 \subsection{Apache Solr}
 
@@ -493,7 +524,7 @@ Aplikacije mogu pristupiti Sphinx-u na tri načina:
 Neke od glavnih značajki Sphinx-a uključuju:
 
 \begin{itemize}
-  \item nativna integracija sa svim poznatim SQL bazama (PostgreSQL, MySQL, MS SQL, Orcale itd)
+  \item nativna integracija sa svim poznatim SQL bazama (PostgreSQL, MySQL, Microsoft SQL, Oracle itd)
   \item vrlo dobra skalabilnost i podrška za distribuiranost
   \item vrlo napredne vrste upita (npr. PARAGRAPH i SENTENCE operator i "before" operator)
   \item sve poznate elemente pretraživanja (stop-riječi, dokumenti s više polja, korjenovanje itd)
@@ -507,22 +538,27 @@ Neke od poznatijih organizacija koje koriste Sphinx su Tumblr i CouchSurfing (uz
 
 \subsection{PostgreSQL}
 
-PostgreSQL je objektno-relacijska baza podataka, napisana u C-u i javno distribuirana pod licencom ``PostgreSQL License'' (slična BSD i MIT licenci). Iako klasične relacijske baze podataka obično nisu namijenjene vrsti pretraživanja kakvu obrađujemo u ovom radu, PostgreSQL se ističe svojim sposobnostima naprednog pretraživanja punog teksta te je validan konkurent.
+PostgreSQL je objektno-relacijska baza podataka, napisana u C-u i javno distribuirana pod licencom ``PostgreSQL License'' (slična BSD i MIT licenci). Iako klasične relacijske baze podataka obično nisu dobre u pretraživanju punog teksta, PostgreSQL se ističe svojim sposobnostima te je validan konkurent.
 
-Neke glavne značajke i prednosti korištenja PostgreSQL-a vezane za pretraživanje punog teksta su:
+Neke od poznatijih organizacija koje koriste PostgreSQL su Apple, IMDb, Red Hat i Skype (uzeto s \url{http://www.postgresql.org/about/users/}).
 
-\begin{itemize}
-  \item nije potreban poseban softver koji treba održavati, već se svi podaci mogu pretraživati direktno iz baze
-  \item samoažurirajući indeks
-  \item napredna tokenizacija (uz uobičajene karakteristike prepoznaje emailove, URL-ove, imena datoteki itd)
-  \item konfigurabilno rangiranje
-  \item konfigurabilni označeni rezultati
-  \item dobre introspekcijske sposobnosti i testiranje
-\end{itemize}
+\subsubsection{Prednosti}
+
+Najčešća arhitektura aplikacija se sastoji od glavne, relacijske baze, te se za pretraživanje punog teksta koristi zaseban softver. Ako je ta glavna baza PostgreSQL, moguće je njega koristiti za pretraživanje punog teksta umjesto zasebnog softvera. To znači da nije potrebno konstantno sinkronizirati dokumente između dva softvera, te će indeks uvijek biti najažurniji. Također, pretraživanje punog teksta će se lakše integrirati u aplikaciju, i programerski tim koji razvija aplikaciju ima jedan softver manje za održavati.
+
+Postgres se odlikuje i po naprednoj tokenizaciji. Osim standardnih vrsta tokena (riječi i brojevi), Postgres sprema u zasebne tokene i emailove, linkove i još mnogo drugih tipova objekata.
+
+\subsubsection{Nedostaci}
+
+Glavni nedostatak Postgresa je što, u usporedbi s ostalim tražilicama punog teksta, daje funkcionalnost na puno nižoj razini. Velik broj osnovnih tipova upita je teško prevesti u domenu Postgresa.
+
+Primerice, Postgres ne prepoznaje booleove upite kakve bi ih korisnik napisao; on zahtijeva da između svake riječi postoji operator. Također, on nema direktnu podršku za fraze, nego fraze treba ekstrahirati iz upita i staviti u dodatan SQL upit. Nadalje, Postgres ima funkciju za sličnost dviju riječi, ali ju je nemoguće iskoristiti za automatsko ispravljanje zatipaka bez velikog usporavanja upita. Također, Postgres nema podršku za TF-IDF metodu rangiranja.
+
+Konačno, u Postgresu se pretraživanje kroz više tablica (preko stranih ključeva) ne može indeksirati. Jedan način kako se to može zaobići je indeksiranjem i pretraživanjem svake tablice posebno, te spajanjem rezultata pomoću stranih ključeva. Međutim, tada je vrlo teško izračunati sveukupnu relevantnost glavnog dokumenta. Drugi način kako se to može zaobići jest denormalizacijom baze. Međutim, to narušava arhitekturu baze podataka i otežava čuvanje integriteta i generalno održavanje.
 
 \subsection{Elasticsearch}
 
-Elasticsearch je distribuirana platforma za pretraživanje punog teksta i analitiku u realnom vremenu, sagrađena na Apache Lucene. Napisana je u Javi i javno distribuirana pod licencom "Apache License 2.0". Elasticsearch je \textit{dokumentno-orijentirana} baza podataka, što spada u tzv \textit{NoSQL} tipove baza (naziv dolazi iz činjenice da se s takvim bazama ne komunicira SQL jezikom). Slika \ref{elasticsearch} ilustrira analogiju između elemenata Elasticsearch-a i relacijskih baza.
+Elasticsearch je distribuirana platforma za pretraživanje punog teksta i analitiku u realnom vremenu, sagrađena na Apache Lucene. Napisana je u Javi i javno distribuirana pod licencom "Apache License 2.0". Elasticsearch je \textit{dokumentno-orijentirana} baza podataka, što spada u tzv. \textit{NoSQL} tipove baza (naziv dolazi iz činjenice da se s takvim bazama ne komunicira SQL jezikom). Slika \ref{elasticsearch} ilustrira analogiju između elemenata Elasticsearch-a i relacijskih baza.
 
 \begin{figure}[H]
   \centering
@@ -534,7 +570,7 @@ Elasticsearch je distribuirana platforma za pretraživanje punog teksta i analit
   \label{elasticsearch}
 \end{figure}
 
-Kao i Apache Solr, Elasticsearch također sadrži web aplikaciju s kojom se komunicira preko HTTP API-a (koristeći isključivo JSON format):
+Kao i Apache Solr, Elasticsearch se također sastoji od web aplikacije s kojom se komunicira preko HTTP protokola, preko JSON formata.
 
 \begin{description}
   \item[\texttt{PUT /<namespace>/<type>/<id>}] \hfill \\ Za dodavanje novih, ažuriranje postojećih dokumenata u indeksu
@@ -543,46 +579,27 @@ Kao i Apache Solr, Elasticsearch također sadrži web aplikaciju s kojom se komu
   \item[\texttt{DELETE /<namespace>/<type>/<id>}] \hfill \\ Za brisanje indeksiranog dokumenta
 \end{description}
 
-Neke od glavnih značajki Elasticsearch-a uključuju:
-
-\begin{itemize}
-  \item automatska distribuiranost
-  \item jednostavan HTTP API
-  \item nativni Java API
-  \item kontrola paralelnih zahtjeva
-  \item napredna introspekcija (npr. uvid zašto dokument je/nije pronađen)
-  \item napredna agregacija podataka
-  \item napredno i konfigurabilno rangiranje
-  \item podrška za geolokacije
-\end{itemize}
-
 Neke od poznatijih organizacija koje koriste Elasticsearch su Wikipedia, The Guardian, Stack Overflow i GitHub (uzeto iz \cite{elastic} na \url{http://www.elasticsearch.org/guide/en/elasticsearch/guide/current/getting-started.html}).
 
-\section{Aplikacija}
+\subsubsection{Prednosti}
 
-\chapter{Rezultati}
+HTTP API Elasticsearcha je vrlo napredan i opsežan. Primjerice, cijelo administriranje je moguće provoditi isključivo preko HTTP API-a. Također, arhitektura i dizajn URL-ova su moderni i slijede najbolje prakse – \textit{REST}\footnote{\url{https://www.ics.uci.edu/~fielding/pubs/dissertation/rest_arch_style.htm}}. Međutim, HTTP API je samo jedan način komuniciranja s Elasticsearchom. Ukoliko je aplikacija koja koristi Elasticsearch napisana u Javi ili jeziku koji može komunicirati sa Javom, umjesto HTTP API-a moguće koristiti Java API direktno (što je brže).
+
+Za razliku od većine tražilica punog teskta, Elasticsearch sam upravlja replikacijama i cijepanju u skladu s količinom i frekvencijom zahtjeva. To je velika prednost, jer smanjuje količinu potrebnog administriranja, i čini skaliranje na više računala jednostavnijim.
+
+Elasticsearch također ima ugrađenu podršku za kontrolu paralelnih zahtjeva. Općenito, kada dva korisnika žele ažurirati isti dokument u isto vrijeme, može se dogoditi da promjene jednog korisnika prebrišu promjene drugog. Elasticsearch to rješava tzv. optimističnim zaključavanjem, koje se sastoji od toga da svaki dokument ima svoju verziju (koja se inkrementira pri svakom ažuriranju). Tada aplikacija može spriječiti korisnika da ažurira jednu verziju dokumenta ako se u međuvremenu dokument ažuririrao i dobio drugu verziju.
+
+Elasticsearch ima dio API-a koji pruža veliku razinu introspekcije u sveukupno funkcioniranje sustava. Instalacija Elasticsearcha također dolazi i sa web aplikacijom koja vizualno prikazuje to stanje s grafovima, i koja koristi taj API.
+
+Konačno, Elasticsearch nativno podržava kompleksne upite (booleovi operatori, fraze, specificiranje polja itd), te nije potrebno posebno prevoditi dolazeće upite.
+
+\subsubsection{Nedostaci}
+
+Elasticsearch nema podršku za automatsko ispravljanje zatipaka. Moguće je posebnu riječ označiti s "~" (npr. "Stol~"), te će se za tu riječ tolerirati zatipci. No, da postignemo općenito ispravljanje zatipaka, potrebno je označiti svaku riječ u upitu. I to je vrlo teško za napraviti, jer moramo paziti da ne označimo booleove izraze, brojeve, riječi unutar fraza i sl.
+
+Elasticsearch također nema podršku za rangiranje rezultata s obzirom na blizinu pronađenih riječi iz upita, što može znatno smanjiti relevantnost rezultata.
 
 \chapter{Zaključak}
-
-\section{Skaliranje}
-
-Kada gradimo aplikaciju za pretraživanje, s vremenom se broj dokumenata i broj korisnika može znatno povećati. To znači da se performanse pretraživanja mogu znatno smanjiti. Postoje razni aspekti koje možemo mjeriti da dobijemo uvid u brzinu pretraživanja:
-
-\begin{compactitem}
-  \item \textbf{Propusnost upita} – Broj upita koji sustav može obraditi u nekoj vremenskoj jedinici (npr. broj upita po sekundi).
-  \item \textbf{Prosječna brzina upita} – Vrijeme koje prosječnom upitu treba da se obradi.
-  \item \textbf{Statistike predmemorije} – Mnogi sistemi spremaju rezultate upita u predmemoriju (eng. \textit{cache}), i korisno je znati koliko se puta predmemorija iskoristila. Ako je predmemorija vrlo rijetko iskorištena, onda može biti brže isključiti predmemoriju.
-  \item \textbf{Veličina indeksa} – Veličina indeksa je obično proporcionalna s vremenom upita.
-\end{compactitem}
-
-Prirodan način za ubrzati bilo koji računalni rad je nadogradnja hardvera. To znači da se vrijeme pretraživanja može ubrzati nadogradnjom RAM-a i procesora. Također, upotreba SSD-a (eng. \textit{solid state drive}) može znatno ubrzati vrijeme upita, iako može usporiti ažuriranje dokumenata.
-
-Dok nadogradnja jednog računala može puno pomoći, performanse koje se mogu postići jednim računalom su svejedno ograničene. U jednom trenutku je potrebno distribuirati tražilicu na više računala (tzv \textit{skaliranje}). Tražilice punog teksta podržavaju dvije metode skaliranja:
-
-\begin{compactenum}
-  \item \textit{Replikacija} – Jedan indeks koji stane na jedno računalo se može kopirati na više računala. Na taj način se opterećenje može distribuirati po više računala. To je vrlo korisno kada je indeks relativno mali, ali je broj upita vrlo velik.
-  \item \textit{Cijepanje} – Jedan indeks se može rascijepati u više dijelova (eng. \textit{shards}), i svaki dio se stavlja na zasebno računalo. Cijepanje indeksa obično internalno izvršava tražilica, ali moguće indeks rascijepati i po logičnom pravilu (npr. po govornom jeziku).
-\end{compactenum}
 
 \begin{thebibliography}{99}
   \bibitem{taming} G. S. Ingersoll, T. S. Morton, A. L. Farris, \textit{Taming Text: How to Find, Organize, and Manipulate It}, Manning Publications Co, New York, 2013.
