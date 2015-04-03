@@ -12,7 +12,7 @@ Feature: Indexing
       | engine        |
       | postgres      |
       | elasticsearch |
-      # | solr          |
+      | solr          |
       # | sphinx        |
 
   Scenario Outline: Stopwords
@@ -27,7 +27,7 @@ Feature: Indexing
       | engine        |
       | postgres      |
       | elasticsearch |
-      # | solr          |
+      | solr          |
       # | sphinx        |
 
   Scenario Outline: Unaccenting
@@ -42,7 +42,7 @@ Feature: Indexing
       | engine        |
       | postgres      |
       | elasticsearch |
-      # | solr          |
+      | solr          |
       # | sphinx        |
 
   Scenario Outline: Stemming
@@ -57,5 +57,5 @@ Feature: Indexing
       | engine        |
       | postgres      |
       | elasticsearch |
-      # | solr          |
+      | solr          |
       # | sphinx        |

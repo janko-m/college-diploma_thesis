@@ -433,7 +433,7 @@ Mnogo aplikacija, osim vraćenih rezultata, žele prikazati i zašto je pojedini
 
 \chapter{Skaliranje}
 
-Kada gradimo aplikaciju za pretraživanje, s vremenom se broj dokumenata i broj korisnika može znatno povećati. To znači da se performanse pretraživanja mogu znatno smanjiti. Postoje razni aspekti koje možemo mjeriti da dobijemo uvid u brzinu pretraživanja:
+Kada gradimo aplikaciju za pretraživanje, s vremenom se broj dokumenata i broj korisnika može znatno povećati. U tom slučaju se performanse pretraživanja mogu znatno smanjiti. Postoje razni aspekti koje možemo mjeriti da dobijemo uvid u brzinu pretraživanja:
 
 \begin{compactitem}
   \item \textbf{Propusnost upita} – Broj upita koji sustav može obraditi u nekoj vremenskoj jedinici (npr. broj upita po sekundi).
@@ -459,7 +459,7 @@ Kôd praktičnog dijela napisan je u programskom jeziku Ruby, i nalazi se na \ur
 
 \begin{compactenum}
   \item unificirane implementacije pretraživanja za svaku tražilicu, koja se nalazi u "lib/" direktoriju, i
-  \item automatiziranih testova koji za svaku tražilicu testiraju sve značajke iz poglavlja \ref{searching}, koji se nalaze u "features/" direktoriju.
+  \item automatiziranih testova koji za svaku tražilicu testiraju sve značajke iz poglavlja \ref{searching}, a nalaze se u "features/" direktoriju.
 \end{compactenum}
 
 \section{Tražilice}
@@ -496,18 +496,23 @@ Solr se koristi tako da se pokrene kao web aplikacija, i s njom se onda komunici
   \item[\texttt{GET /solr/<collection>/select}] \hfill \\ Za pretraživanje indeksiranih dokumenata
 \end{description}
 
-Osim značajki koje uzima iz Apache Lucene, Solr ima i mnogo dodatnih sposobnosti:
-
-\begin{itemize}
-  \item mogućnost upravljanja bilo kojim programskim jezikom (jer se komunikacija odvija preko HTTP-a),
-  \item indeksiranje mnogobrojnih formata datoteki (.pdf, .doc itd) koristeći Apache Tika,
-  \item administrativno sučelje za upravljanje tražilice,
-  \item geoprostorno pretraživanje,
-  \item predmemoriranje (eng. \textit{caching}),
-  \item nativna podrška za upravljanje valutama (npr. određivanje valute iz simbola i automatske konverzije) itd.
-\end{itemize}
-
 Neke od poznatijih organizacija koje koriste Apache Solr su AT\&T, eBay, Netflix i Disney (uzeto s \url{http://lucene.apache.org/solr/}).
+
+\subsubsection{Prednosti}
+
+Budući da je sagrađen na Apache Lucene, Solr nativno podržava kompleksne upite (booleove operatore, fraze itd.). Također nativno podržava preprocesiranje teskstualnih datoteka, koristeći Apache Tika.
+
+Solr ima nativnu podršku za upravljanje valutama. Na primjer, može odrediti o kojoj se valuti radi iz simbola, i može raditi automatske konverzije.
+
+\subsubsection{Nedostaci}
+
+Glavni nedostatak Solra je što ima velik broj modova u kojima se može pokrenuti. Solr se može pokrenuti u modu \textit{default}, \textit{cloud}, \textit{dih}, \textit{schemaless} i \textit{multicore}. To decentralizira Solr i znatno komplicira njegovo korištenje, jer se u svakom modu razičite funkcionalnosti implementiraju na različit način. I to nije uvijek napomenuto u dokumentaciji, tako da je ponekad potrebno puno vremena da se pronađe uzrok nefunkcioniranja određene konfiguracije.
+
+Solrov dizajn URL-ova je zastario i nije dosljedan, što otežava učenje njegovih funkcionalnosti. To se odražava u njihovom vodiču za početnike, gdje je za indeksiranje dokumenata, umjesto običnog alata za rađenje HTTP zahtjeva, korištena specijalizirana Java bilbioteka koji to ``pojednostavljuje''. Također, Solr ima 2 različite dokumentacije, koje opisuju iste komponente, te nije jasno koju bi trebalo čitati.
+
+Solr se konfigurira direktnim ažuriranjem konfiguracijskih datoteki koje se nalaze u instalacijskom direktoriju, umjesto da se ta funkcionalnost implementira u HTTP API-u. To otežava automatizaciju konfiguracije; drugim riječima, teško je napisati program koji će ažurirati konfiguraciju. Također, Solr za konfiguraciju koristi zastarjeli format XML, koji se teže čita od današnjeg standarda, JSON-a.
+
+Solr nema podršku za automatsko ispravljanje zatipaka, i nema podršku za rangiranje po blizini riječi.
 
 \subsection{Sphinx}
 
@@ -579,7 +584,7 @@ Kao i Apache Solr, Elasticsearch se također sastoji od web aplikacije s kojom s
   \item[\texttt{DELETE /<namespace>/<type>/<id>}] \hfill \\ Za brisanje indeksiranog dokumenta
 \end{description}
 
-Neke od poznatijih organizacija koje koriste Elasticsearch su Wikipedia, The Guardian, Stack Overflow i GitHub (uzeto iz \cite{elastic} na \url{http://www.elasticsearch.org/guide/en/elasticsearch/guide/current/getting-started.html}).
+Neke od poznatijih organizacija koje koriste Elasticsearch su Wikipedia, The Guardian, Stack Overflow i GitHub (uzeto iz \cite{elasticguide} na \url{http://www.elasticsearch.org/guide/en/elasticsearch/guide/current/getting-started.html}).
 
 \subsubsection{Prednosti}
 
@@ -591,23 +596,24 @@ Elasticsearch također ima ugrađenu podršku za kontrolu paralelnih zahtjeva. O
 
 Elasticsearch ima dio API-a koji pruža veliku razinu introspekcije u sveukupno funkcioniranje sustava. Instalacija Elasticsearcha također dolazi i sa web aplikacijom koja vizualno prikazuje to stanje s grafovima, i koja koristi taj API.
 
-Konačno, Elasticsearch nativno podržava kompleksne upite (booleovi operatori, fraze, specificiranje polja itd), te nije potrebno posebno prevoditi dolazeće upite.
+Konačno, Elasticsearch nativno podržava kompleksne upite (booleovi operatori, fraze, specificiranje polja itd.), te nije potrebno posebno prevoditi dolazeće upite. Također, nativno podržava preprocesiranje tekstualnih datoteki, koristeći Apache Tika.
 
 \subsubsection{Nedostaci}
 
 Elasticsearch nema podršku za automatsko ispravljanje zatipaka. Moguće je posebnu riječ označiti s "~" (npr. "Stol~"), te će se za tu riječ tolerirati zatipci. No, da postignemo općenito ispravljanje zatipaka, potrebno je označiti svaku riječ u upitu. I to je vrlo teško za napraviti, jer moramo paziti da ne označimo booleove izraze, brojeve, riječi unutar fraza i sl.
 
-Elasticsearch također nema podršku za rangiranje rezultata s obzirom na blizinu pronađenih riječi iz upita, što može znatno smanjiti relevantnost rezultata.
+Elasticsearch također nema podršku za rangiranje rezultata s obzirom na blizinu pronađenih riječi iz upita, što može smanjiti relevantnost rezultata.
 
 \chapter{Zaključak}
 
 \begin{thebibliography}{99}
   \bibitem{taming} G. S. Ingersoll, T. S. Morton, A. L. Farris, \textit{Taming Text: How to Find, Organize, and Manipulate It}, Manning Publications Co, New York, 2013.
-  \bibitem{lucene} \url{http://lucene.apache.org/core/4_10_3/} (siječanj, 2015)
-  \bibitem{solr} \url{http://ftp.carnet.hr/misc/apache/lucene/solr/ref-guide/apache-solr-ref-guide-4.10.pdf} (siječanj, 2015)
-  \bibitem{sphinx} \url{http://sphinxsearch.com/docs/latest/index.html} (siječanj, 2015)
-  \bibitem{postgres} \url{http://www.postgresql.org/docs/9.4/static/index.html} (siječanj, 2015)
-  \bibitem{elastic} C. Gormley, Z. Tong, dostupno na \url{http://www.elasticsearch.org/guide/en/elasticsearch/guide/current/index.html} (siječanj, 2015)
+  \bibitem{lucene} \url{http://lucene.apache.org/core/4_10_3/} (travanj, 2015)
+  \bibitem{solr} \url{http://ftp.carnet.hr/misc/apache/lucene/solr/ref-guide/apache-solr-ref-guide-4.10.pdf} (travanj, 2015)
+  \bibitem{sphinx} \url{http://sphinxsearch.com/docs/latest/index.html} (travanj, 2015)
+  \bibitem{postgres} \url{http://www.postgresql.org/docs/9.4/static/index.html} (travanj, 2015)
+  \bibitem{elasticguide} C. Gormley, Z. Tong, dostupno na \url{http://www.elasticsearch.org/guide/en/elasticsearch/guide/current/index.html} (travanj, 2015)
+  \bibitem{elasticref} C. Gormley, Z. Tong, dostupno na \url{http://www.elastic.co/guide/en/elasticsearch/reference/current/index.html} (travanj, 2015)
 \end{thebibliography}
 
 \pagestyle{empty}

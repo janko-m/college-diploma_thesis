@@ -15,7 +15,7 @@ Feature: Displaying
       | engine        |
       | postgres      |
       | elasticsearch |
-      # | solr          |
+      | solr          |
       # | sphinx        |
 
   Scenario Outline: Highlighting
@@ -24,11 +24,11 @@ Feature: Displaying
       | title          |
       | The Green Mile |
     When I enter a search query "Green" with options "{highlight: true}"
-    Then I should get results "['The <strong>Green</strong> Mile']"
+    Then the first result should be "The <strong>Green</strong> Mile"
 
     Examples:
       | engine        |
       | postgres      |
       | elasticsearch |
-      # | solr          |
+      | solr          |
       # | sphinx        |

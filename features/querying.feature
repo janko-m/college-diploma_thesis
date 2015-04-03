@@ -14,7 +14,7 @@ Feature: Querying
       | engine        |
       | postgres      |
       | elasticsearch |
-      # | solr          |
+      | solr          |
       # | sphinx        |
 
   Scenario Outline: Synonym expansion
@@ -29,7 +29,7 @@ Feature: Querying
       | engine        |
       | postgres      |
       | elasticsearch |
-      # | solr          |
+      | solr          |
       # | sphinx        |
 
   Scenario Outline: Typos
@@ -44,7 +44,7 @@ Feature: Querying
       | engine        |
       | postgres      |
       | elasticsearch |
-      # | solr          |
+      | solr          |
       # | sphinx        |
 
   Scenario Outline: Phrases
@@ -61,7 +61,7 @@ Feature: Querying
       | engine        |
       | postgres      |
       | elasticsearch |
-      # | solr          |
+      | solr          |
       # | sphinx        |
 
   Scenario Outline: Boolean operators
@@ -89,7 +89,7 @@ Feature: Querying
       | engine        |
       | postgres      |
       | elasticsearch |
-      # | solr          |
+      | solr          |
       # | sphinx        |
 
   Scenario Outline: Wildcards
@@ -107,7 +107,7 @@ Feature: Querying
       | engine        |
       | postgres      |
       | elasticsearch |
-      # | solr          |
+      | solr          |
       # | sphinx        |
 
   Scenario Outline: Facets
@@ -130,5 +130,5 @@ Feature: Querying
       | engine        |
       | postgres      |
       | elasticsearch |
-      # | solr          |
+      | solr          |
       # | sphinx        |

@@ -14,7 +14,7 @@ Feature: Ranking
       | engine        |
       | postgres      |
       | elasticsearch |
-      # | solr          |
+      | solr          |
       # | sphinx        |
 
   Scenario Outline: Field weights
@@ -32,7 +32,7 @@ Feature: Ranking
       | engine        |
       | postgres      |
       | elasticsearch |
-      # | solr          |
+      | solr          |
       # | sphinx        |
 
   Scenario Outline: Word proximity
@@ -48,5 +48,5 @@ Feature: Ranking
       | engine        |
       | postgres      |
       | elasticsearch |
-      # | solr          |
+      | solr          |
       # | sphinx        |
