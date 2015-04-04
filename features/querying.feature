@@ -15,7 +15,7 @@ Feature: Querying
       | postgres      |
       | elasticsearch |
       | solr          |
-      # | sphinx        |
+      | sphinx        |
 
   Scenario Outline: Synonym expansion
     Given I'm using <engine>
@@ -30,7 +30,7 @@ Feature: Querying
       | postgres      |
       | elasticsearch |
       | solr          |
-      # | sphinx        |
+      | sphinx        |
 
   Scenario Outline: Typos
     Given I'm using <engine>
@@ -45,7 +45,7 @@ Feature: Querying
       | postgres      |
       | elasticsearch |
       | solr          |
-      # | sphinx        |
+      | sphinx        |
 
   Scenario Outline: Phrases
     Given I'm using <engine>
@@ -62,7 +62,7 @@ Feature: Querying
       | postgres      |
       | elasticsearch |
       | solr          |
-      # | sphinx        |
+      | sphinx        |
 
   Scenario Outline: Boolean operators
     Given I'm using <engine>
@@ -90,7 +90,7 @@ Feature: Querying
       | postgres      |
       | elasticsearch |
       | solr          |
-      # | sphinx        |
+      | sphinx        |
 
   Scenario Outline: Wildcards
     Given I'm using <engine>
@@ -108,7 +108,7 @@ Feature: Querying
       | postgres      |
       | elasticsearch |
       | solr          |
-      # | sphinx        |
+      | sphinx        |
 
   Scenario Outline: Facets
     Given I'm using <engine>
@@ -131,4 +131,4 @@ Feature: Querying
       | postgres      |
       | elasticsearch |
       | solr          |
-      # | sphinx        |
+      | sphinx        |

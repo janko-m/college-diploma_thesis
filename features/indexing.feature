@@ -13,7 +13,7 @@ Feature: Indexing
       | postgres      |
       | elasticsearch |
       | solr          |
-      # | sphinx        |
+      | sphinx        |
 
   Scenario Outline: Stopwords
     Given I'm using <engine>
@@ -28,7 +28,7 @@ Feature: Indexing
       | postgres      |
       | elasticsearch |
       | solr          |
-      # | sphinx        |
+      | sphinx        |
 
   Scenario Outline: Unaccenting
     Given I'm using <engine>
@@ -43,7 +43,7 @@ Feature: Indexing
       | postgres      |
       | elasticsearch |
       | solr          |
-      # | sphinx        |
+      | sphinx        |
 
   Scenario Outline: Stemming
     Given I'm using <engine>
@@ -58,4 +58,4 @@ Feature: Indexing
       | postgres      |
       | elasticsearch |
       | solr          |
-      # | sphinx        |
+      | sphinx        |

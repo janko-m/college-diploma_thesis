@@ -528,20 +528,25 @@ Aplikacije mogu pristupiti Sphinx-u na tri načina:
   \item kroz MySQL server sa konfiguriranim spremanjem u \textit{SphinxSE}
 \end{enumerate}
 
-Neke od glavnih značajki Sphinx-a uključuju:
-
-\begin{itemize}
-  \item nativna integracija sa svim poznatim SQL bazama (PostgreSQL, MySQL, Microsoft SQL, Oracle itd)
-  \item vrlo dobra skalabilnost i podrška za distribuiranost
-  \item vrlo napredne vrste upita (npr. PARAGRAPH i SENTENCE operator i "before" operator)
-  \item sve poznate elemente pretraživanja (stop-riječi, dokumenti s više polja, korjenovanje itd)
-  \item vrlo napredno i potpuno konfigurabilno rangiranje na principu dodavanja faktora (blizina riječi, TF-IDF itd)
-  \item sortiranje po relevantnosti ili poljima
-  \item grupiranje (eng. \textit{clustering}) rezultata
-  \item CLI (eng. \textit{Command-Line Interface}) za upravljanje bazom
-\end{itemize}
-
 Neke od poznatijih organizacija koje koriste Sphinx su Tumblr i CouchSurfing (uzeto s \url{http://sphinxsearch.com/info/powered/}).
+
+\subsubsection{Prednosti}
+
+Sphinx ima nativnu integraciju sa svim poznatim SQL bazama (PostgreSQL, MySQL, Microsoft SQL, Oracle itd.), što ga automatski čini iskoristivim za većinu aplikacija. Sve što je potrebno da bi se podaci sinkronizirali je poslati Sphinxu komandu da indeksira, i on će dograbiti podatke iz SQL baze i staviti u svoj indeks. Sphinx ima više vrsta indeksa, i jedna vrsta je \textit{indeks u realnom vremenu}, koji eliminira potrebu eksplicitnog osvježavanja indeks jer se ti indeksi mogu sami osvježavati.
+
+Osim standardnih vrsta upita, Sphinx podržava i vrlo napredne vrste. Primjerice, upit ``\textit{pećina SENTENCE medvjed}'' će pronaći sve dokumente u kojima se riječ \textit{pećina} i \textit{medvjed} pojavljuju u istoj rečenice. Slično, upit ``\textit{jabuke PARAGRAPH voćnjak}'' će ponaći sve dokumente u kojima se riječ \textit{jabuka} nalazi u istom paragrafu kao riječ \textit{voćnjak}. Još jedan koristan operator je "MAYBE", koji funckionira kao nekomutativni oblik "OR" operatora; upit ``\textit{jabuka MAYBE kruška}'' neće vratiti dokumente u kojima se spominje \textit{kruška} a ne spomnije \textit{jabuka}. Zbog Sphinxove napredne sintakse upita potrebno je vrlo malo prevođenja korisničkog upita u domenu Sphinxa.
+
+Sphinx omogućuje definiranje svojih funkcija rangiranja, koje mogu biti kompozicije postojećih (TF-IDF, blizina riječi itd.).
+
+\subsubsection{Nedostaci}
+
+Sphinx jer potrebno dosta precizno konfigurirati da bi radio dobro. Na primjer, bez inicijalne konfiguracije Sphinx će pri pretraživanju dokumenata učitati cijelu tablicu u memoriju. Doduše, Sphinx ima upute za zaobilaženje tog problema, ali moraju se eksplicitno unijeti u konfiguraciju, što nije prijateljski prema novim korisnicima.
+
+U Sphinxu ima 2 načina indeksiranja, od kojih se svaki konfigurira na drugi način. Prvi način indeksiranja bez konfiguracije zahtijeva da se uvijek iznova indeksiraju svi podaci. To može biti sporo, pa su uvedeni tzv. \textit{delta} indeksi, koji omogućavaju indeksiranje samo dijela dokumenata koji su ažurirani. Međutim, ti indeksi se moraju konfigurirati na vrlo niskoj razini, i delta indeksi se moraju ručno spajati s glavnim indeksom, što je sveukupno dosta komplicirano. Zato je Sphinx uveo drugi način indeksiranja, tzv. \textit{indeksi u realnom vremenu}. Međutim, ja nisam uspio postići da rade.
+
+Sphinx nije baš fleksibilan što se tiče podataka koje indeksira. Kada se ažuriraju stupci u nekoj tablici, najčešće je potrebno ažurirati i polja unutar konfiguracije. To komplicira održavanje i često može rezultirati nenadanim greškama.
+
+Sphinx nema podršku za ispravljanje zatipaka i normalizaciju dijakritičkih znakova.
 
 \subsection{PostgreSQL}
 
@@ -598,15 +603,16 @@ Elasticsearch također ima ugrađenu podršku za kontrolu paralelnih zahtjeva. O
 
 Elasticsearch ima dio API-a koji pruža veliku razinu introspekcije u sveukupno funkcioniranje sustava. Instalacija Elasticsearcha također dolazi i sa web aplikacijom koja vizualno prikazuje to stanje s grafovima, i koja koristi taj API.
 
-Konačno, Elasticsearch nativno podržava kompleksne upite (booleovi operatori, fraze, specificiranje polja itd.), te nije potrebno posebno prevoditi dolazeće upite. Također, nativno podržava preprocesiranje tekstualnih datoteki, koristeći Apache Tika.
+Elasticsearch nativno podržava kompleksne upite (booleovi operatori, fraze, specificiranje polja itd.), te nije potrebno posebno prevoditi dolazeće upite. Također, nativno podržava preprocesiranje tekstualnih datoteki, koristeći Apache Tika.
 
 \subsubsection{Nedostaci}
 
-Elasticsearch nema podršku za automatsko ispravljanje zatipaka. Moguće je posebnu riječ označiti s "~" (npr. "Stol~"), te će se za tu riječ tolerirati zatipci. No, da postignemo općenito ispravljanje zatipaka, potrebno je označiti svaku riječ u upitu. I to je vrlo teško za napraviti, jer moramo paziti da ne označimo booleove izraze, brojeve, riječi unutar fraza i sl.
+Elasticsearch nema podršku za automatsko ispravljanje zatipaka. Moguće je posebnu riječ označiti s "{\raise.17ex\hbox{$\scriptstyle\mathtt{\sim}$}}" (npr. "Stol{\raise.17ex\hbox{$\scriptstyle\mathtt{\sim}$}}"), te će se za tu riječ tolerirati zatipci. No, da postignemo općenito ispravljanje zatipaka, potrebno je označiti svaku riječ u upitu. I to je vrlo teško za napraviti, jer moramo paziti da ne označimo booleove izraze, brojeve, riječi unutar fraza i sl.
 
 Elasticsearch također nema podršku za rangiranje rezultata s obzirom na blizinu pronađenih riječi iz upita, što može smanjiti relevantnost rezultata.
 
 \chapter{Zaključak}
+
 
 \begin{thebibliography}{99}
   \bibitem{taming} G. S. Ingersoll, T. S. Morton, A. L. Farris, \textit{Taming Text: How to Find, Organize, and Manipulate It}, Manning Publications Co, New York, 2013.
@@ -614,7 +620,7 @@ Elasticsearch također nema podršku za rangiranje rezultata s obzirom na blizin
   \bibitem{solr} \url{http://ftp.carnet.hr/misc/apache/lucene/solr/ref-guide/apache-solr-ref-guide-4.10.pdf} (travanj, 2015)
   \bibitem{sphinx} \url{http://sphinxsearch.com/docs/latest/index.html} (travanj, 2015)
   \bibitem{postgres} \url{http://www.postgresql.org/docs/9.4/static/index.html} (travanj, 2015)
-  \bibitem{elasticguide} C. Gormley, Z. Tong, dostupno na \url{http://www.elasticsearch.org/guide/en/elasticsearch/guide/current/index.html} (travanj, 2015)
+  \bibitem{elasticguide} C. Gormley, Z. Tong, dostupno na \url{http://www.elastic.co/guide/en/elasticsearch/guide/current/index.html} (travanj, 2015)
   \bibitem{elasticref} C. Gormley, Z. Tong, dostupno na \url{http://www.elastic.co/guide/en/elasticsearch/reference/current/index.html} (travanj, 2015)
 \end{thebibliography}
 
