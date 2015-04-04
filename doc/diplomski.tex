@@ -252,10 +252,13 @@ Proširivanje sinonimima se vrši na upitu, a ne na indeksu, jer bi se inače in
 
 Pri unosu upita, često se mogu pojaviti zatipci (eng. \textit{typographical error}); bilo zato što korisnik ne zna kako se neka riječ piše (npr. ako piše na engleskom), bilo iz razloga što je korisnik jednostavno pritisnuo krivu tipku na tastaturi, i nije to primjetio. Štoviše, zatipci se mogu pojaviti i u tekstu koji se pretražuje.
 
-Zato je uobičajeno da tražilica tolerira određeni stupanj ``greške'' u unosu. Ukoliko tražilica ne pronađe danu riječ u indeksu, ona pokuša pronaći dokumente sa riječima koje su ``slične'' riječi iz upita. Neke tražilice čak idu dalje i u slučaju velike sigurnosti ponude korisniku ispravljenu riječ.
+Zato je uobičajeno da tražilica tolerira određeni stupanj ``greške'' u unosu. Ukoliko tražilica ne pronađe danu riječ u indeksu, ona pokuša pronaći dokumente sa riječima koje su ``slične'' riječi iz upita. Neke tražilice čak idu dalje i u slučaju velike sigurnosti ponude korisniku ispravljenu riječ (Google).
 
-Spomenuli smo pojam međusobne ``sličnosti'' riječi, ali nismo definirali kako se to izračunava. Ovdje je opet od velike pomoći promatranje \textit{n}-grama. Ranije smo radili s \textit{n}-gramima na razini riječi, ali ovaj puta promatramo \textit{n}-grame na razini slova. Najbolja mjera za sličnost dviju riječi je broj njihovih zajedničkih \textit{n}-grama (\cite{taming} str. 99), konkretnije trigrama\footnote{\url{http://www.postgresql.org/docs/9.4/static/pgtrgm.html}}.
+Spomenuli smo pojam ``sličnosti'' dviju riječi, ali nismo definirali kako se ona izračunava. Postoje tri vrste mjere sličnosti koje su danas u upotrebi. Prva vrsta je \textit{udaljenost po izmjenama}, od kojih je najpoznatija \textit{Levenshteinova udaljenost}. Levenshteinova udaljenost mjeri sličnost dviju riječi izračunavanjem minimalnog broja izmjena koji je potrebno napraviti na jednoj riječi da bi se dobila druga. Postoje tri vrste izmjena: umetanje, brisanje i zamjena. Umetanje dodaje slovo na bilo koje mjesto unutar riječi, brisanje briše jedno slovo iz riječi, a zamjena zamjenjuje jedno slovo s drugim (\cite{taming} str. 89). Što je manji broj takvih izmjena potrebno da bi se jedna riječ transformirala u drugu, to su te dvije riječi sličnije. U praksi se obično ne upotrebljava Levenshteinova udaljenost veća od 2.
 
+Druga vrsta mjere za sličnost riječi je \textit{n-gram udaljenost}. Ranije smo radili s \textit{n}-gramima na razini riječi, ali ovaj puta ćemo promatrati \textit{n}-grame na razini slova. \textit{n}-gram udaljenost mjeri sličnost dviju riječi tako da gleda broj njihovih zajedničkih \textit{n}-grama (\cite{taming} str. 99). Dvije riječi su sličnije što više zajedničkih \textit{n}-grama imaju. Jedna prednost \textit{n}-gram udaljenosti u odnosu na Levenshteinovu jest da \textit{n}-gram udaljenost penalizira greške u prvim slovima više nego u ostalim slovima u riječi. I to je u upravo u skladu sa načinom na koji se zatipci i rade. Naime, autor teksta neće se skoro nikad napraviti zatipak u prvom ili drugom slovu (jer se takva greška lako uoči), već će ga uglavnom napraviti u kasnijim slovima. Ako uspoređujemo dvije riječi i postoji razlika u prvom i/ili drugom slovu, tada se najvjerojatnije ne radi o dvije iste riječi od kojih jedna ima zatipak, već o različitim riječima. U praksi se pokazalo da najbolje rezultate daje promatranje zajedničkih \textit{trigrama} (\cite{postgres} na \url{http://www.postgresql.org/docs/9.4/static/pgtrgm.html}).
+
+Osim sličnosti po slovima, postoje i algoritmi za sličnosti među riječima po \textit{zvučnosti}, i to je treća vrsta mjere. Originalni algoritam je \textit{Soundex}, koji funkcionira tako da svakoj riječi pridruži niz znakova, koji označava njenu ``zvučnost'' te se ti znakovi onda mogu uspoređivati. Soundex radi samo za engleski jezik. Soundex je zatim razvijen u \textit{Metaphone}, koji poboljšava algoritam tako da koristi informaciju varijacija i nedosljednosti engleskog jezika da proizvede točniji niz znakova. Sljedeća verzija Metaphonea je nazvana \textit{Double Metaphone}. Glavna stvar koju Double Metaphone dodaje je prva podrška za ne-engleske vrste jezika: slavenski, germanski, keltski, grčki, francuski, talijanski, španjolski i kineski (\cite{metaphone}).
 
 \subsection{Fraze}
 
@@ -603,16 +606,15 @@ Elasticsearch također ima ugrađenu podršku za kontrolu paralelnih zahtjeva. O
 
 Elasticsearch ima dio API-a koji pruža veliku razinu introspekcije u sveukupno funkcioniranje sustava. Instalacija Elasticsearcha također dolazi i sa web aplikacijom koja vizualno prikazuje to stanje s grafovima, i koja koristi taj API.
 
-Elasticsearch nativno podržava kompleksne upite (booleovi operatori, fraze, specificiranje polja itd.), te nije potrebno posebno prevoditi dolazeće upite. Također, nativno podržava preprocesiranje tekstualnih datoteki, koristeći Apache Tika.
+Elasticsearch nativno podržava složene upite (booleovi operatori, fraze, specificiranje polja itd.), te nije potrebno posebno prevoditi dolazeće upite. Osim složenih upita, Elasticsearch podržava i jednostavne upite koji se mogu međusobno kombinirati. Tako je, na primjer, moguće izvršiti neku vrstu upita te mu dodati upit koji nalazi slične dokumente. Tada će rezultati biti kombinacija ta dva upita, danim redoslijedom. Elasticsearch također nativno podržava preprocesiranje tekstualnih datoteki, koristeći Apache Tika.
 
 \subsubsection{Nedostaci}
 
-Elasticsearch nema podršku za automatsko ispravljanje zatipaka. Moguće je posebnu riječ označiti s "{\raise.17ex\hbox{$\scriptstyle\mathtt{\sim}$}}" (npr. "Stol{\raise.17ex\hbox{$\scriptstyle\mathtt{\sim}$}}"), te će se za tu riječ tolerirati zatipci. No, da postignemo općenito ispravljanje zatipaka, potrebno je označiti svaku riječ u upitu. I to je vrlo teško za napraviti, jer moramo paziti da ne označimo booleove izraze, brojeve, riječi unutar fraza i sl.
+Elasticsearch nema podršku za automatsko ispravljanje zatipaka. Moguće je posebnu riječ označiti s "{\raise.17ex\hbox{$\scriptstyle\mathtt{\sim}$}}" (npr. "Stol{\raise.17ex\hbox{$\scriptstyle\mathtt{\sim}$}}"), te će se za tu riječ tolerirati zatipci. No, da postignemo općenito ispravljanje zatipaka, potrebno je označiti svaku riječ u upitu. I to je teže za napraviti, jer moramo paziti da ne označimo booleove izraze, brojeve, riječi unutar fraza i sl.
 
 Elasticsearch također nema podršku za rangiranje rezultata s obzirom na blizinu pronađenih riječi iz upita, što može smanjiti relevantnost rezultata.
 
 \chapter{Zaključak}
-
 
 \begin{thebibliography}{99}
   \bibitem{taming} G. S. Ingersoll, T. S. Morton, A. L. Farris, \textit{Taming Text: How to Find, Organize, and Manipulate It}, Manning Publications Co, New York, 2013.
@@ -622,6 +624,7 @@ Elasticsearch također nema podršku za rangiranje rezultata s obzirom na blizin
   \bibitem{postgres} \url{http://www.postgresql.org/docs/9.4/static/index.html} (travanj, 2015)
   \bibitem{elasticguide} C. Gormley, Z. Tong, dostupno na \url{http://www.elastic.co/guide/en/elasticsearch/guide/current/index.html} (travanj, 2015)
   \bibitem{elasticref} C. Gormley, Z. Tong, dostupno na \url{http://www.elastic.co/guide/en/elasticsearch/reference/current/index.html} (travanj, 2015)
+  \bibitem{metaphone} \url{http://en.wikipedia.org/wiki/Metaphone} (travanj, 2015)
 \end{thebibliography}
 
 \pagestyle{empty}
