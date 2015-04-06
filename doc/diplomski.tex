@@ -51,26 +51,26 @@
 
 \chapter{Uvod}
 
-Kada se informacije premjeste iz tiskanog u digitalni format, moguće ih je analizirati i pretraživati uporabom računala. Kroz godine razvijene su razne metode i tehnike obrade teksta kako bi se unaprijedila organizacija tih digitalnih informacija. U nastavku teksta ćemo jednu sadržajnu cjelinu informacija (knjiga, članak i sl.) koja može imati više polja (naslov, autor itd.) zvati \textit{dokument}.
+Kada se informacije premjeste iz tiskanog u digitalni format, moguće ih je analizirati i pretraživati uporabom računala. Kroz godine razvijene su razne metode i tehnike obrade teksta kako bi se unaprijedila organizacija tih digitalnih informacija. U nastavku ćemo jednu sadržajnu cjelinu informacija (knjiga, članak i sl.) koja može imati više polja (naslov, autor itd.) zvati \textit{dokument}.
 
 Postoje razni korisni rezultati koji se mogu postići današnjim metodama obrade teksta. Primjerice, moguće je grupirati nepovezanu kolekciju dokumenata po sličnosti (eng. \textit{clustering}), te korisniku koji čita jedan dokument ponuditi druge, sadržajno \textit{povezane} dokumente (eng. \textit{more like this}). Također, moguće je iz dokumenata izvaditi najbitnije pojmove, i tako saznati glavnu temu dokumenta. I naravno, moguće je pretraživati dokumente po nekom upitu. Od svih navedenih značajki, pretraživanje je jedina neophodna za upravljanje digitalnim informacijama te će ono biti tema ovog rada.
 
-Bez mogućnosti kvalitetnog pretraživanja korisnik najčešće neće moći pronaći željeni dokument, jer je u većini aplikacija broj dokumenata jednostavno prevelik. A ukoliko korisnik ne može pronaći neki dokument, taj dokument efektivno ne postoji. To nije veliki problem ako se radi o aplikaciji kao što su web novine. Međutim, za web dućane korisnikova nemogućnost da pronađe određeni artikl znači da korisnik taj artikl ne može niti kupiti. Također, za web tražilice (npr. \textit{Google}) korisnikova nemogućnost da pronađe određenu web stranicu znači da joj on ne može pristupiti. Dakle, većini aplikacija mogućnost kvalitetnog pretraživanja nije samo luksuz, već je značajka koja je neophodna da bi te aplikacije ispunjavale svoju osnovnu funkciju.
+Bez mogućnosti kvalitetnog pretraživanja korisnik najčešće neće moći pronaći željeni dokument, jer je u većini aplikacija broj dokumenata jednostavno prevelik. A ako korisnik ne može pronaći neki dokument, taj dokument efektivno ne postoji. To nije veliki problem ako se radi o aplikaciji kao što su web novine. Međutim, za web dućane korisnikova nemogućnost da pronađe određeni artikl znači da korisnik taj artikl ne može niti kupiti. Nadalje, za web tražilice (npr. \textit{Google}) korisnikova nemogućnost da pronađe određenu web stranicu znači da joj on ne može pristupiti. Dakle, većini aplikacija mogućnost kvalitetnog pretraživanja nije samo luksuz, već je značajka koja je tim aplikacijama neophodna za ispunjavanje njihove osnovne funkcije.
 
-Budući da se informacije obično sastoje od velikih količina teksta, ovaj rad bit će orijentiran na tzv. \textit{pretraživanje punog teskta} (eng. \textit{full-text search}). Za kvalitetno pretraživanje punog teksta, nažalost, općenito nisu dovoljne klasične relacijske baze podataka (MySQL, Microsoft SQL Server, Oracle). Dok su takve baze podataka vrlo efikasne za pretraživanje po diskretnim vrijednostima polja, one obično ne mogu odrediti \textit{koliko} neki dokument ispunjava određeni tekstualni upit. Točnije, ne znaju efikasno odrediti koja polja dokumenta ispunjavaju koliki dio upita, i tako odrediti koliko je taj dokument relevantan upitu. Iako klasične baze podataka podržavaju regularne izraze, kvalitetno pretraživanje punog teksta zahtijeva više od jednostavnog uspoređivanja znakova. Takve tražilice trebale bi moći unaprijed obraditi tekst da maksimalno ubrzaju vrijeme izvršavanja upita. Isto tako, trebale bi moći ispraviti eventualne zatipke (eng. \textit{typo}) korisnika, i ne ograničavati se na specifične padeže i veličine slova. Konačno, takve tražilice trebale bi moći vratiti rezultate rangirane po tome koliko odgovaraju upitu. U sljedećim poglavljima obradit ćemo glavne značajke koje tražilice punog teskta trebaju imati.
+Budući da se informacije obično sastoje od velikih količina teksta, ovaj rad bit će orijentiran na tzv. \textit{pretraživanje punog teksta} (eng. \textit{full-text search}). Za kvalitetno pretraživanje punog teksta, nažalost, općenito nisu dovoljne klasične relacijske baze podataka (MySQL, Microsoft SQL Server, Oracle). Dok su takve baze podataka vrlo efikasne za pretraživanje po diskretnim vrijednostima polja, one obično ne mogu odrediti \textit{koliko} neki dokument ispunjava određeni tekstualni upit. Točnije, ne znaju efikasno odrediti koja polja dokumenta ispunjavaju koliki dio upita, i tako odrediti koliko je taj dokument relevantan upitu. Iako klasične baze podataka podržavaju regularne izraze, kvalitetno pretraživanje punog teksta zahtijeva više od jednostavnog uspoređivanja znakova. Tražilice punog teksta trebale bi moći unaprijed obraditi tekst da maksimalno ubrzaju vrijeme izvršavanja upita. Isto tako, trebale bi moći ispraviti eventualne zatipke (eng. \textit{typo}) korisnika, i ne ograničavati se na specifične padeže i veličine slova. Konačno, takve tražilice trebale bi moći vratiti rezultate rangirane po tome koliko odgovaraju upitu. U sljedećim poglavljima obradit ćemo glavne značajke pretraživanja punog teksta.
 
-Kako bi svojim korisnicima mogla pružiti mogućnost pretraživanja, aplikacija može izabrati ili sama implementirati svoju tražilicu, ili koristiti jedan od već postojećih softvera za to. Budući da je danas kvaliteta javno dostupnih tražilica dosegla razinu gdje je dovoljna za vodeće svjetske aplikacije, nema razloga ne odlučiti se za potonju opciju. U radu će biti spomenuti i obrađeni svi vodeći softveri za pretraživanje i to isključivo oni otvorenog kôda (eng. \textit{open source}). Naime, tražilice otvorenog koda pokazale su se kao izvrsno funkcionalne i za svjetski popularne aplikacije (npr. Wikipedia), pa najčešće nema potrebe za korištenjem komercijalnih.
+Kako bi svojim korisnicima pružila mogućnost pretraživanja, aplikacija može izabrati ili sama implementirati svoju tražilicu, ili koristiti jedan od već postojećih softvera za to. Budući da je danas kvaliteta javno dostupnih tražilica dosegla razinu gdje je dovoljna za vodeće svjetske aplikacije, nema razloga ne odlučiti se za potonju opciju. U radu će biti spomenuti i obrađeni svi vodeći softveri za pretraživanje i to isključivo oni otvorenog kôda (eng. \textit{open source}). Naime, tražilice otvorenog kôda pokazale su se kao izvrsno funkcionalne i za svjetski popularne aplikacije (npr. Wikipedia), pa u većini slučajeva nema potrebe za korištenjem komercijalnih.
 
-Praktični dio ovog rada sastojat će se implementacije pretraživanja u svakoj od vodećih tražilica punog teksta. Program će testirati koje sve značajke obrađene u sljedećem poglavlju podržava pojedina tražilica. Direktno iskustvo sa svakom tražilicom je potrebno da bi se dobilo što bolje razmijevanje tih softvera. Pomoću toga ću iznijeti glavne prednosti i nedostatke svakog softvera, i zaključiti koji je od njih najbolji.
+Praktični dio ovog rada sastojat će se implementacije pretraživanja u svakoj od vodećih tražilica punog teksta. Program će testirati koje sve značajke obrađene u sljedećem poglavlju podržava pojedina tražilica. Direktno iskustvo sa svakom tražilicom je potrebno da bi se dobilo što bolje razmijevanje tih softvera. Kombinacijom tog iskustva i dokumentacije iznijet ću glavne prednosti i nedostatke svakog softvera, i zaključiti koji je od njih najbolji.
 
 \chapter{Pretraživanje} \label{searching}
 
 U ovom poglavlju bit će obrađeni svi glavni elementi pretraživanja punog teksta. Proces pretraživanja može se opisati u četiri dijela:
 
 \begin{compactenum}
-  \item \textbf{Indeksiranje} – Datoteke i baze podataka obrađuju se i pripremaju za pretraživanje
-  \item \textbf{Upit} – Korisnik upisuje ključne riječi kroz neku vrstu korisničkog sučelja, i tražilica pronalazi sve dokumente koji ispunjavaju upit
-  \item \textbf{Rangiranje} – Tražilica rangira pronađene dokumente s obzirom koliko dobro ispunjavaju upit
+  \item \textbf{Indeksiranje} – Datoteke i baze podataka obrađuju se i pripremaju za pretraživanje.
+  \item \textbf{Upit} – Korisnik upisuje ključne riječi kroz neku vrstu korisničkog sučelja, i tražilica pronalazi sve dokumente koji ispunjavaju upit.
+  \item \textbf{Rangiranje} – Tražilica rangira pronađene dokumente s obzirom na to koliko dobro ispunjavaju upit.
   \item \textbf{Prikaz rezultata} – Konačni rezultati se prikazuju u korisničkom sučelju.
 \end{compactenum}
 
@@ -128,13 +128,13 @@ Nakon što su svi dokumenti svedeni na zajednički tekstualni format, moguće je
 
 \subsubsection{Detekcija rečenica}
 
-Na početku same analize teksta, potrebno je radvojiti tekst u rečenice. Kada tražilica ne bi znala gdje završavaju rečenice, za frazni upit ``pobjednik Ivica Kostelić'' bi mogla vratiti dokument u kojem se pojavljuje:
+Na početku same analize teksta, potrebno je radvojiti tekst u rečenice. Kada tražilica ne bi znala gdje završavaju rečenice, za frazni upit ``pobjednik Ivica Kostelić'' mogla bi vratiti dokument u kojem se pojavljuje:
 
 \begin{quoting}
   \textit{Prvo mjesto svjetskog skijaškog kupa odnosi novi \underline{pobjednik. Ivica Kostelić}, nažalost, osvojio je 25. mjesto u prvoj vožnji i nosi porazno zadnje mjesto.}
 \end{quoting}
 
-Iako se riječi \textit{pobjednik}, \textit{Ivica} i \textit{Kostelić} u ovom tekstu tehnički pojavljuju jedna za drugom, znamo da ne odgovaraju fraznom upitu jer nakon riječi \textit{pobjednik} završava rečenica.
+Iako se riječi \textit{pobjednik}, \textit{Ivica} i \textit{Kostelić} u ovom tekstu tehnički pojavljuju jedna za drugom, znamo da ne bi trebale odgovarati fraznom upitu jer nakon riječi \textit{pobjednik} završava rečenica.
 
 Međutim, pravilno detektirati rečenice je teže nego što izgleda. To je zato što pojava interpunkcijskog znaka ne označava uvijek kraj rečenice. Točka može biti dio rednog broja (\textit{25.}) ili dio skraćenice (\textit{tj.}). Točka, upitnik i uskličnik koji se pojavljuju unutar navodnika (npr. kod direktnog govora) također ne označavaju kraj rečenice.
 
@@ -178,7 +178,7 @@ Vidimo da su riječi pravilno odvojene, i očuvani su interpunkcijski znakovi. O
 
 \subsubsection{Normalizacija veličine slova}
 
-U većini aplikacija korisnicima nije važno da dokumenti koje pokušavaju naći sadrže unešene ključne riječi točno jednake veličine. Na primjer, za ključnu riječ ``jabuka'' bi u većini slučajeva imalo smisla da rezultat pretraživanja također uključuje i dokumente koji sadrže riječ ``Jabuka''. Štoviše, kada bi se veličina slova uzimala u obzir, ako bi korisnik htio naći sve dokumente koji sadrže riječ ``jabuka'', bilo na početku ili na kraju rečenice, morao bi proširiti upit na ``jabuka Jabuka''.
+U većini aplikacija korisnicima nije važno da dokumenti koje pokušavaju naći sadrže unešene ključne riječi točno iste veličine. Na primjer, za ključnu riječ ``jabuka'' bi u većini slučajeva imalo smisla da rezultat pretraživanja uključuje i dokumente koji sadrže riječ ``Jabuka''. Štoviše, kada bi se veličina slova uzimala u obzir, ako bi korisnik htio naći sve dokumente koji sadrže riječ ``jabuka'', bilo na početku ili na kraju rečenice, morao bi proširiti upit na ``jabuka Jabuka''.
 
 Zato se svim tokenima po konvenciji sva slova pretvaraju u mala, čime se efektivno normalizira veličina slova.
 
@@ -190,9 +190,9 @@ Iz tog razloga se stop-riječi često izbacuju iz liste tokena. To rezultira i b
 
 \subsubsection{Normalizacija dijakritičkih znakova}
 
-Velik broj govornih jezika u svom alfabetu imaju dijakritičke znakove. Na primjer, hrvatski jezik ima 5 dijakritičkih znakova: \textit{ć}, \textit{č}, \textit{ž}, \textit{š} i \textit{đ}. Štoviše, dijakritički znakovi mogu se pojaviti i u tekstu na jeziku koji u alfabetu nema dijakritičke znakove. Na primjer, u engleskom jeziku je uobičajeno da se pojavi francuska tuđica \textit{déjà vu}.
+Velik broj govornih jezika u svom alfabetu ima dijakritičke znakove. Na primjer, hrvatski jezik ima 5 dijakritičkih znakova: \textit{ć}, \textit{č}, \textit{ž}, \textit{š} i \textit{đ}. Štoviše, dijakritički znakovi mogu se pojaviti i u tekstu na jeziku koji u alfabetu nema dijakritičke znakove. Na primjer, u engleskom jeziku je uobičajeno da se pojavi francuska tuđica \textit{déjà vu}.
 
-Međutim, kod pretraživanja teksta, dobro je normalizirati te znakove tako da korisnici u upitu mogu koristiti pojednostavljene verzije tih znakova:
+Kod pretraživanja teksta, dobro je normalizirati te znakove tako da korisnici u upitu mogu koristiti pojednostavljene verzije tih znakova:
 
 \begin{nscenter}
   \begin{tabular}{ccccc}
@@ -202,13 +202,13 @@ Međutim, kod pretraživanja teksta, dobro je normalizirati te znakove tako da k
   \end{tabular}
 \end{nscenter}
 
-Postoji nekoliko razloga zašto bi korisnicima trebalo omogućiti pretraživanje bez dijakritičkih znakova. Jedan razlog je što bi inače korisnicima koji koriste englesku tipkovnicu bilo naporno naći načina kako da unesu dijakritičke znakove (jer ih engleske tipkovnice nemaju). A vidjeli smo da se i u engleskim tekstovima mogu pojaviti tuđice s dijakritičkim znakovima. Također, normalizacija dijakritičkih znakova bi pomogla i korisnicima koji su možda neiskusni u jeziku u kojem pretražuju, pa ne znaju pravilno koristiti dijakritičke znakove.
+Postoji nekoliko razloga zašto bi korisnicima trebalo omogućiti pretraživanje bez dijakritičkih znakova. Jedan razlog je što bi inače korisnicima koji koriste englesku tipkovnicu bilo naporno naći način kako da unesu dijakritičke znakove (jer ih engleske tipkovnice nemaju). A vidjeli smo da se i u engleskim tekstovima mogu pojaviti tuđice s dijakritičkim znakovima. Također, normalizacija dijakritičkih znakova bi pomogla i korisnicima koji su možda neiskusni u jeziku u kojem pretražuju, pa ne znaju pravilno koristiti dijakritičke znakove.
 
 \subsubsection{Korjenovanje}
 
 Pretpostavimo da korisnik želi naći sve dokumente vezane uz banke. Budući da ne zna u kojem obliku i padežu se pojavljuje ta riječ, korisnik bi morao upisivati u tražilicu ``banka banke banci ... banke bankama ... bankarstvo bankarstva ...''. Ovakvo korisničko iskustvo očito nije prihvatljivo; korisnik bi trebao moći samo upisati riječ ``banka'', i time pretražiti sve varijacije te riječi.
 
-\textit{Korjenovanje} (eng. \textit{stemming}) je proces reduciranja riječi na njen korijen ili jednostavniji oblik koji sam po sebi ne mora biti riječ (\cite{taming} str. 25). Ono omogućuje korisniku da upiše jednu riječ, i dobije natrag sve dokumente koji sadrže bilo koju varijaciju te riječi. Kao i za stop-riječi, za korjenovanje je također potreban digitalni rječnik.
+\textit{Korjenovanje} (eng. \textit{stemming}) je proces reduciranja riječi na njen korijen ili jednostavniji oblik koji sam po sebi ne mora biti riječ (\cite{taming} str. 25). Pri indeksiranju se onda spremaju samo korijeni riječi, a pri pretraživanju se također sve riječi korjenuju. To omogućuje korisniku da upiše jednu riječ, i dobije natrag sve dokumente koji sadrže bilo koju varijaciju te riječi.
 
 Postoje razni stupnjevi korjenovanja; neki su agresivniji, reducirajući riječi na najmanji mogući korijen, dok su drugi blaži, preferirajući samo osnovnije promjene kao što su odstranjivanje nastavaka broja i padeža. Svaka aplikacija odabire svoj stupanj korjenovanja, ovisno o željenom omjeru kvalitete i kvantitete. Agresivnije korjenovanje uglavnom vodi ka više rezultata ali manjoj kvaliteti, dok blaže korjenovanje može očuvati razinu kvalitete ali uz rizik da neće biti vraćeni neki korisni rezultati. Također, korjenovanje može uzrokovati probleme gdje se riječi s drukčijim značenjem reduciraju na isti korijen, ili gdje se riječi koje su povezane ne reduciraju na isti korijen (\cite{taming} str. 26).
 
@@ -225,7 +225,7 @@ Nakon što se svi dokumenti tokeniziraju, i ti tokeni normaliziraju obradama nav
   \label{inverted_index}
 \end{figure}
 
-Uz pohranjivanje veza između termova i dokumenata, indeksiranje često uključuje i izračunavanje i spremanje informacija o važnosti termova u odnosu na ostale termove u dokumentu, što je detaljnije objašnjeno u \ref{tfidf}. Ta informacija igra veliku ulogu u omogućavanju tražilice da rangira dokumente po relevantnosti (\cite{taming} str. 42).
+Uz pohranjivanje veza između termova i dokumenata, indeksiranje često uključuje i izračunavanje i spremanje informacija o važnosti termova u odnosu na ostale termove u dokumentu, što je detaljnije objašnjeno u \ref{tfidf}. Ta informacija igra veliku ulogu u omogućavanju tražilici da rangira dokumente po relevantnosti (\cite{taming} str. 42).
 
 \section{Upit}
 
@@ -235,7 +235,7 @@ Prije nego tražilica počne pretraživati indeks, sam tekst upita obično prola
 
 \subsection{Ključne riječi}
 
-Najosnovniji oblik upita je jednostavno nizanje ključnih riječi odvojenih razmakom (slika \ref{keywords}). Tražilice su obično konfigurirane tako da rezultat takvog upita vrati dokumente koji sadržavaju bilo koju ključnu riječ, s time da su dokumenti koji sadrže više ključnih riječi više i rangirani. Međutim, ukoliko je potrebna veća preciznost, tražilica može radije vratiti isključivo dokumente koji sadrže \textit{sve} ključne riječi.
+Najosnovniji oblik upita je jednostavno nizanje ključnih riječi odvojenih razmakom (slika \ref{keywords}). Tražilice su obično konfigurirane tako da rezultat takvog upita vrati dokumente koji sadržavaju bilo koju ključnu riječ, s time da su dokumenti koji sadrže više ključnih riječi rangirani više. Međutim, ukoliko je potrebna veća preciznost, tražilica može vraćati isključivo dokumente koji sadrže \textit{sve} ključne riječi.
 
 \begin{figure}[H]
   \centering
@@ -248,17 +248,17 @@ Najosnovniji oblik upita je jednostavno nizanje ključnih riječi odvojenih razm
 
 Kada korisnik u polje za pretraživanje upiše ključnu riječ ``pećina'', on bi u rezultatima najčešće htio dobiti i dokumente koji sadrže riječ ``špilja''. Iz tog razloga se često upit proširuje sa sinonimima svake riječi. Na primjer, koristeći booleove operatore, upit ``mračna pećina'' bi se mogao proširiti na ``mračna pećina OR špilja''.
 
-Proširivanje sinonimima se vrši na upitu, a ne na indeksu, jer bi se inače indeks znatno povećao (za \textit{svaku} riječ se dodaju \textit{svi} sinonimi), indeksiranje bi općenito dulje trajalo i indeks bi trebalo obnoviti svaki put kada se list sinonima ažurira.
+Proširivanje sinonimima se vrši na upitu, a ne na indeksu, jer bi ta količina dodatnih riječi znatno povećala indeks (za \textit{svaku} riječ se dodaju \textit{svi} sinonimi), indeksiranje bi općenito dulje trajalo i indeks bi trebalo obnoviti svaki put kada se lista sinonima ažurira.
 
 \subsubsection{Ispravljanje zatipaka}
 
-Pri unosu upita, često se mogu pojaviti zatipci (tipfeleri); bilo zato što korisnik ne zna kako se neka riječ piše, bilo iz razloga što je korisnik jednostavno pritisnuo krivu tipku na tastaturi, i nije to primjetio. Dodatno, zatipci se mogu pojaviti i u tekstu koji se pretražuje.
+Pri unosu upita, često se mogu pojaviti zatipci (tipfeleri); bilo zato što korisnik ne zna kako se neka riječ piše, bilo iz razloga što je korisnik jednostavno pritisnuo krivu tipku na tastaturi i nije to primjetio. Dodatno, zatipci se mogu pojaviti i u tekstu koji se pretražuje.
 
-Kada bi se sve riječi tražile doslovno, upit poput ``New Yrok'' najvjerojatnije ne bi vratio niti jedan rezultat. To nije dobro korisničko iskustvo, tražilica punog teksta bi trebala moći prepoznati ovakve zatipke, i ponuditi korisniku ispravljeni upit (eng. \textit{did you mean}). Isprva se čini da bi bilo najbolje da tražilica automatski pri pretraživanju provjerava za zatipke. Međutim, to zapravo ne bi dobro funkcioniralo, i moglo narušiti kvalitetu vraćenih rezultata. Na primjer, ukoliko je u pretraživanju korišteno korjenovanje, riječ "running" će se korjenovati u "run", te se riječ "runing" u upitu (koja će ostati ista nakon korjenovanja) neće prepoznati kao zatipak, jer je previše različita od riječi "run". Nadalje, ukoliko se u pretraživanju koriste sinonimi, pri upitu će se provjeravati zatipci za svaki od sinonima, te se mogu pronaći tekstovi s riječima koje uopće nisu slične niti jednoj riječi iz originalnog upita (\cite{fuzzy}). Također, ukoliko neki dokument sadržavi zatipak, zbog TF-IDF-a (potpoglavlje \ref{tfidf}) će se taj dokument rangirati više nego onaj bez zatipka, jer je rijeđi. Drugim riječima, ukoliko je u upitu napravljen zatipak, tražilica će u rezultatima favorizirati dokumente koji isto imaju zatipak, što je obrnuto intuiciji jer takvi dokumenti često nisu toliko stručni (\cite{elasticguide} \textit{Scoring Fuzziness}). Zbog toga je bolje za ispravljanje zatipaka napraviti dodatan upit, u kojem su isključene sve ostale značajke (rangiranje, korjenovanje, sinonimi itd.).
+Kada bi se sve riječi tražile doslovno, upit poput ``New Yrok'' najvjerojatnije ne bi vratio niti jedan rezultat. To nije dobro korisničko iskustvo, tražilica punog teksta bi trebala moći prepoznati ovakve zatipke, i ponuditi korisniku ispravljeni upit (eng. \textit{did you mean}). Isprva se čini da bi bilo najbolje da tražilica automatski pri pretraživanju provjerava za zatipke. Međutim, to u praksi ne bi dobro funkcioniralo, i moglo narušiti kvalitetu vraćenih rezultata. Na primjer, ukoliko je u pretraživanju korišteno korjenovanje, riječ "running" će se korjenovati u "run", te se riječ "runing" u upitu (koja će ostati ista nakon korjenovanja) neće prepoznati kao zatipak, jer je previše različita od riječi "run". Nadalje, ukoliko se u pretraživanju koriste sinonimi, pri upitu će se provjeravati zatipci za svaki od sinonima, te se mogu pronaći tekstovi s riječima koje uopće nisu slične niti jednoj riječi iz originalnog upita (\cite{fuzzy}). Također, ukoliko neki dokument sadržavi zatipak, zbog TF-IDF-a (potpoglavlje \ref{tfidf}) će se taj dokument rangirati više nego onaj bez zatipka, jer je rijeđi. Drugim riječima, kada je u upitu napravljen zatipak, tražilica će u rezultatima favorizirati dokumente koji isto imaju zatipak, što je obrnuto intuiciji jer su dokumenti sa više zatipaka obično manje stručni (\cite{elasticguide} \textit{Scoring Fuzziness}). Zbog toga je bolje za ispravljanje zatipaka napraviti dodatan upit, u kojem su isključene sve ostale značajke (rangiranje, korjenovanje, sinonimi itd.).
 
-Da tražilica može ispraviti zatipke, mora moći prepoznati kada se vjerojatno radi o zatipku, a kada o različitoj riječi. Za to mora znati koliko su neke dvije riječi ``slične''. Postoje tri vrste mjere sličnosti koje su u upotrebi. Prva vrsta je \textit{udaljenost po izmjenama}, od kojih je najpoznatija \textit{Damerau-Levenshteinova udaljenost}. Damerau-Levenshteinova udaljenost mjeri sličnost dviju riječi izračunavanjem minimalnog broja izmjena koji je potrebno napraviti na jednoj riječi da bi se dobila druga. Te izmjene se dijele u 4 vrste: umetanje, brisanje, zamjena i transpozicija. Umetanje dodaje slovo na bilo koje mjesto unutar riječi, brisanje briše jedno slovo iz riječi, zamjena zamjenjuje jedno slovo s drugim, a transpozicija zamjenjuje redoslijed dva susjedna slova (\cite{taming} str. 89 i \cite{elasticguide} \textit{Fuzziness}). Što je manji broj takvih izmjena potrebno da bi se jedna riječ transformirala u drugu, to su te dvije riječi sličnije. U praksi se obično ne upotrebljava Damerau-Levenshteinova udaljenost veća od 2. Jedan razlog tome je što bi računanje Damerau-Levenshteinove udaljenosti veće od 2 bilo vremenski preskupo. Drugi razlog je taj što je Damerau uočio da 80\% ljudskih zatipaka imaju Damerau-Levenshteinovu udaljenost 1 (\cite{damerau}), što znači da udaljenost 3 najvjerojatnije više nije rezultat zatipka.
+Da tražilica može ispraviti zatipke, mora moći prepoznati kada se vjerojatno radi o zatipku, a kada o različitoj riječi. Za to mora znati koliko su neke dvije riječi ``slične''. Postoje tri vrste mjere sličnosti koje su u upotrebi. Prva vrsta je \textit{udaljenost po izmjenama}, od kojih je najpoznatija \textit{Damerau-Levenshteinova udaljenost}. Damerau-Levenshteinova udaljenost mjeri sličnost dviju riječi izračunavanjem minimalnog broja izmjena koje je potrebno napraviti na jednoj riječi da bi se dobila druga. Te izmjene se dijele u 4 vrste: umetanje, brisanje, supstitucija i transpozicija. Umetanje dodaje slovo na bilo koje mjesto unutar riječi, brisanje briše jedno slovo iz riječi, supstitucija zamjenjuje jedno slovo s drugim, a transpozicija zamjenjuje redoslijed dva susjedna slova (\cite{taming} str. 89 i \cite{elasticguide} \textit{Fuzziness}). Što je manji broj takvih izmjena potrebno da bi se jedna riječ transformirala u drugu, to su te dvije riječi sličnije. U praksi se obično ne upotrebljava Damerau-Levenshteinova udaljenost veća od 2. Jedan razlog tome je što bi računanje Damerau-Levenshteinove udaljenosti veće od 2 bilo vremenski preskupo. Drugi razlog je taj što je Damerau uočio da 80\% ljudskih zatipaka imaju Damerau-Levenshteinovu udaljenost 1 (\cite{damerau}), što znači da udaljenost 3 najvjerojatnije više nije rezultat zatipka.
 
-Druga vrsta mjere za sličnost riječi je \textit{n-gram udaljenost}. Ranije smo radili s \textit{n}-gramima na razini riječi, ali ovaj puta ćemo promatrati \textit{n}-grame na razini slova. \textit{n}-gram udaljenost mjeri sličnost dviju riječi tako da gleda broj njihovih zajedničkih \textit{n}-grama (\cite{taming} str. 99). Dvije riječi su sličnije što više zajedničkih \textit{n}-grama imaju. Jedna prednost \textit{n}-gram udaljenosti u odnosu na Damerau-Levenshteinovu jest da \textit{n}-gram udaljenost penalizira greške u prvim slovima više nego u ostalim slovima u riječi (\cite{taming} str. 92). I to je u upravo u skladu sa načinom na koji se zatipci i rade. Naime, autor teksta neće se skoro nikad napraviti zatipak u prvom ili drugom slovu (jer se takva greška lako uoči), već će ga uglavnom napraviti u kasnijim slovima. Ako uspoređujemo dvije riječi i postoji razlika u prvom i/ili drugom slovu, tada se najvjerojatnije ne radi o dvije iste riječi od kojih jedna ima zatipak, već o različitim riječima. U praksi se pokazalo da najbolje rezultate daje promatranje zajedničkih \textit{trigrama} (\cite{postgres} \textit{pg\_trgm}).
+Druga vrsta mjere za sličnost riječi je \textit{n-gram udaljenost}. Ranije smo radili s \textit{n}-gramima na razini riječi, ali ovaj puta ćemo promatrati \textit{n}-grame na razini slova. \textit{n}-gram udaljenost mjeri sličnost dviju riječi tako da gleda broj njihovih zajedničkih \textit{n}-grama (\cite{taming} str. 99). Dvije riječi su sličnije što više zajedničkih \textit{n}-grama imaju. Jedna prednost \textit{n}-gram udaljenosti u odnosu na Damerau-Levenshteinovu jest da \textit{n}-gram udaljenost penalizira greške u prvim slovima više nego u ostalim slovima u riječi (\cite{taming} str. 92). I to je u upravo u skladu sa načinom na koji se zatipci i rade. Naime, autor teksta neće se skoro nikad napraviti zatipak u prvom ili drugom slovu (jer se takva greška lako uoči), već će ga najčešće napraviti u kasnijim slovima. Ako uspoređujemo dvije riječi i postoji razlika u prvom i/ili drugom slovu, tada se najvjerojatnije ne radi o dvije iste riječi od kojih jedna ima zatipak, već o različitim riječima. U praksi se pokazalo da najbolje rezultate daje promatranje zajedničkih \textit{trigrama} (\cite{postgres} \textit{pg\_trgm}).
 
 Osim sličnosti po slovima, postoje i algoritmi za sličnosti među riječima po \textit{zvučnosti}, i to je treća vrsta mjere. Originalni algoritam je \textit{Soundex}, koji funkcionira tako da svakoj riječi pridruži niz znakova, koji označava njenu ``zvučnost'' te se ti znakovi onda mogu uspoređivati. Soundex radi samo za engleski jezik. Soundex je zatim razvijen u \textit{Metaphone}, koji poboljšava algoritam tako da koristi informaciju varijacija i nedosljednosti engleskog jezika da proizvede točniji niz znakova. Sljedeća verzija Metaphonea je nazvana \textit{Double Metaphone}. Glavna stvar koju Double Metaphone dodaje je prva podrška za ne-engleske vrste jezika: slavenski, germanski, keltski, grčki, francuski, talijanski, španjolski i kineski (\cite{metaphone}).
 
@@ -266,7 +266,7 @@ Niti jedna od te tri mjere udaljenosti nije najbolja, te bi svaka tražilica tre
 
 \subsection{Fraze}
 
-Pretpostavimo da radimo aplikaciju koja omogućuje korisnicima da gledaju riječi pjesama. Pretpostavimo sada da korisnik želi iskoristiti tu aplikaciju da pronađe naziv i autora pjesme na temelju fraza koje je zapamtio iz slušanja te pjesme. Ako korisnik upiše te fraze iz pjesme kao običan niz ključnih riječi, postoji vjerojatnost da će rezultati uključivati i druge pjesme koje sadrže te ključne riječi pa možda pjesma koju korisnik traži neće biti na prvom mjestu. S druge strane, kada bi korisnik mogao reći tražilici da se određeni nizovi riječi iz upita nalaze u dokumentima točno tim redoslijedom, broj vraćenih pjesama se može znatno smanjiti (jer je puno manja vjerojatnost da dvije pjesme dijele čitavu frazu nego par individualnih riječi) i puno je vjerojatnije da će tražena pjesma biti prvi rezultat.
+Pretpostavimo da radimo aplikaciju koja omogućuje korisnicima da gledaju riječi pjesama. Pretpostavimo sada da korisnik želi iskoristiti tu aplikaciju da pronađe naziv i autora pjesme na temelju fraza koje je zapamtio iz slušanja te pjesme. Ako korisnik upiše te fraze iz pjesme kao običan niz ključnih riječi, postoji vjerojatnost da će rezultati uključivati i druge pjesme koje sadrže te ključne riječi pa možda pjesma koju korisnik traži neće biti na prvom mjestu. S druge strane, kada bi korisnik mogao reći tražilici da se određeni nizovi riječi iz upita nalaze u dokumentima točno tim redoslijedom, broj vraćenih pjesama se može znatno smanjiti (jer je puno manja vjerojatnost da dvije pjesme dijele čitavu frazu) i puno je vjerojatnije da će tražena pjesma biti prvi rezultat.
 
 Niz ključnih riječi može se označiti kao fraza tako da se omeđi dvostrukim navodnicima (slika \ref{phrases}). Tražilica pretražuje dokumente za frazu pomoću tzv. \textit{n}-grama. \textit{n}-gram je bilo koji \textit{n}-člani podniz uzastopnih elemenata nekog niza. Radi brzine se najprije s manjim \textit{n}-gramima odredi na kojim mjestima je najvjerojatnije da se fraza nalazi te se zatim ispituju zabilježena mjesta (\cite{taming} str. 31).
 
@@ -428,7 +428,7 @@ Budući da tražilica najprije mora izračunati relevantnost svih dokumenata, ka
 
 \subsection{Isticanje}
 
-Mnogo aplikacija, osim vraćenih rezultata, žele prikazati i zašto je pojedini dokument ispunjavao upit. To se postiže isticanjem određenih dijelova dokumenta koji su ispunili upit (slika \ref{highlighting}). Tražilica obično vrati dokumente gdje su dijelovi koji ispunjavaju upit okruženi nekim indikatorom (najčešće je to neki HTML tag, npr \texttt{<em></em>}), kojeg onda aplikacija prikaže na željen način.
+Mnogo aplikacija, osim vraćenih rezultata, žele prikazati i zašto je pojedini dokument ispunjavao upit. To se postiže isticanjem određenih dijelova dokumenta koji su ispunili upit (slika \ref{highlighting}). Tražilica obično vrati dokumente gdje su dijelovi koji ispunjavaju upit okruženi nekim indikatorom (najčešće je to neki HTML tag, npr. \texttt{<em></em>}), kojeg onda aplikacija prikaže na željen način.
 
 \begin{figure}[H]
   \centering
@@ -459,7 +459,7 @@ Dok nadogradnja jednog računala može puno pomoći, performanse koje se mogu po
 
 \chapter{Implementacija}
 
-U prethodnim poglavljima obradili smo sve glavne značajke koje bi tražilice trebale imati. U ovom poglavlju ću napraviti uvod i iznijeti rezultate praktičnog dijela ovog rada.
+U prethodnim poglavljima obradili smo sve glavne značajke koje bi tražilice punog teksta trebale imati. U ovom poglavlju ćemo napraviti uvod i iznijeti rezultate praktičnog dijela ovog rada.
 
 Praktični dio sastoji se od implementacije obrađenih značajki u svakoj od vodećih tražilica punog teksta, u području softvera otvorenog kôda. Cilj praktičnog dijela je steći znanje o funkcionalnosti svake tražilice kroz direktno iskustvo, te na temelju toga iznijeti prednosti i nedostatke svake tražilice.
 
@@ -540,17 +540,17 @@ Neke od poznatijih organizacija koje koriste Sphinx su Tumblr i CouchSurfing (uz
 
 \subsubsection{Prednosti}
 
-Sphinx ima nativnu integraciju sa svim poznatim SQL bazama (PostgreSQL, MySQL, Microsoft SQL, Oracle itd.), što ga automatski čini iskoristivim za većinu aplikacija. Sve što je potrebno da bi se podaci sinkronizirali je poslati Sphinxu komandu da indeksira, i on će dograbiti podatke iz SQL baze i staviti u svoj indeks. Sphinx ima više vrsta indeksa, i jedna vrsta je \textit{indeks u realnom vremenu}, koji eliminira potrebu eksplicitnog osvježavanja indeks jer se ti indeksi mogu sami osvježavati (\cite{sphinx} \textit{Real-Time Indices}).
+Sphinx ima nativnu integraciju sa svim poznatim SQL bazama (PostgreSQL, MySQL, Microsoft SQL, Oracle itd.), što ga automatski čini iskoristivim za većinu aplikacija. Sve što je potrebno da bi se podaci sinkronizirali je poslati Sphinxu komandu da indeksira, i on će dograbiti podatke iz SQL baze i staviti u svoj indeks. Sphinx ima više vrsta indeksa, i jedna vrsta je \textit{indeks u realnom vremenu}, koja eliminira potrebu eksplicitnog osvježavanja indeksa jer se oni sami mogu osvježavati (\cite{sphinx} \textit{Real-Time Indices}).
 
-Osim standardnih vrsta upita, Sphinx podržava i vrlo napredne vrste. Primjerice, upit ``\textit{pećina SENTENCE medvjed}'' će pronaći sve dokumente u kojima se riječ \textit{pećina} i \textit{medvjed} pojavljuju u istoj rečenice. Slično, upit ``\textit{jabuke PARAGRAPH voćnjak}'' će ponaći sve dokumente u kojima se riječ \textit{jabuka} nalazi u istom paragrafu kao riječ \textit{voćnjak}. Još jedan koristan operator je "MAYBE", koji funckionira kao nekomutativni oblik "OR" operatora; upit ``\textit{jabuka MAYBE kruška}'' neće vratiti dokumente u kojima se spominje \textit{kruška} a ne spomnije \textit{jabuka}. Zbog Sphinxove napredne sintakse upita potrebno je vrlo malo prevođenja korisničkog upita u domenu Sphinxa (\cite{sphinx} \textit{Extended query syntax}).
+Osim standardnih vrsta upita, Sphinx podržava i vrlo napredne vrste. Primjerice, upit ``\textit{pećina SENTENCE medvjed}'' će pronaći sve dokumente u kojima se riječ \textit{pećina} i \textit{medvjed} pojavljuju u istoj rečenici. Slično, upit ``\textit{jabuke PARAGRAPH voćnjak}'' će pronaći sve dokumente u kojima se riječ \textit{jabuka} nalazi u istom paragrafu kao riječ \textit{voćnjak}. Još jedan koristan operator je "MAYBE", koji funckionira kao nekomutativni oblik "OR" operatora; upit ``\textit{jabuka MAYBE kruška}'' neće vratiti dokumente u kojima se pojavljuje riječ \textit{kruška}, a ne pojavljuje se riječ \textit{jabuka}. Zbog Sphinxove napredne sintakse upita potrebno je vrlo malo prevođenja korisničkog upita u domenu Sphinxa (\cite{sphinx} \textit{Extended query syntax}).
 
 Sphinx omogućuje definiranje svojih funkcija rangiranja, koje mogu biti kompozicije postojećih (TF-IDF, blizina riječi itd.).
 
 \subsubsection{Nedostaci}
 
-Sphinx jer potrebno dosta precizno konfigurirati da bi radio dobro. Na primjer, bez inicijalne konfiguracije Sphinx će pri pretraživanju dokumenata učitati cijelu tablicu u memoriju. Doduše, Sphinx ima upute za zaobilaženje tog problema, ali moraju se eksplicitno unijeti u konfiguraciju, što nije prijateljski prema novim korisnicima.
+Sphinx jer potrebno dosta precizno konfigurirati da bi radio dobro. Na primjer, bez inicijalne konfiguracije Sphinx će pri pretraživanju dokumenata učitati cijelu SQL tablicu u memoriju. Doduše, Sphinx ima upute za zaobilaženje tog problema, ali moraju se eksplicitno unijeti u konfiguraciju, što nije prijateljski prema novim korisnicima.
 
-U Sphinxu ima 2 načina indeksiranja, od kojih se svaki konfigurira na drugi način. Prvi način indeksiranja bez konfiguracije zahtijeva da se uvijek iznova indeksiraju svi podaci. To može biti sporo, pa su uvedeni tzv. \textit{delta} indeksi, koji omogućavaju indeksiranje samo dijela dokumenata koji su ažurirani. Međutim, ti indeksi se moraju konfigurirati na vrlo niskoj razini, i delta indeksi se moraju ručno spajati s glavnim indeksom, što je sveukupno dosta komplicirano. Zato je Sphinx uveo drugi način indeksiranja, tzv. \textit{indeksi u realnom vremenu}. Međutim, ja nisam uspio postići da rade.
+U Sphinxu ima dva načina indeksiranja, od kojih se svaki konfigurira na drugi način. Prvi način indeksiranja bez konfiguracije zahtijeva da se uvijek iznova indeksiraju svi podaci. To može biti sporo, pa su uvedeni tzv. \textit{delta} indeksi, koji omogućavaju indeksiranje samo dijela dokumenata koji su ažurirani. Međutim, ta postavka se mora konfigurirati na vrlo niskoj razini, a delta indeksi se još moraju ručno spajati s glavnim indeksom, što je sveukupno dosta komplicirano. Zato je Sphinx uveo drugi način indeksiranja, tzv. \textit{indeksi u realnom vremenu}. Međutim, ja nisam uspio postići da rade.
 
 Sphinx nije baš fleksibilan što se tiče podataka koje indeksira. Kada se ažuriraju stupci u nekoj tablici, najčešće je potrebno ažurirati i polja unutar konfiguracije. To komplicira održavanje i često može rezultirati nenadanim greškama.
 
@@ -564,9 +564,9 @@ Neke od poznatijih organizacija koje koriste PostgreSQL su Apple, IMDb, Red Hat 
 
 \subsubsection{Prednosti}
 
-Najčešća arhitektura aplikacija se sastoji od glavne, relacijske baze, te se za pretraživanje punog teksta koristi zaseban softver. Ako je ta glavna baza PostgreSQL, moguće je njega koristiti za pretraživanje punog teksta umjesto zasebnog softvera. To znači da nije potrebno konstantno sinkronizirati dokumente između dva softvera, te će indeks uvijek biti najažurniji. Također, pretraživanje punog teksta će se lakše integrirati u aplikaciju, i programerski tim koji razvija aplikaciju ima jedan softver manje za održavati.
+Najčešća arhitektura aplikacija se sastoji od glavne, relacijske baze, te se za pretraživanje punog teksta koristi zaseban softver. Ako je ta glavna baza PostgreSQL, moguće je njega koristiti za pretraživanje punog teksta umjesto zasebnog softvera. To znači da nije potrebno konstantno sinkronizirati dokumente između dva softvera, te će indeks uvijek biti najažurniji. Također, pretraživanje punog teksta se u tom slučaju lakše integrira u aplikaciju, i programerski tim koji razvija aplikaciju ima jedan softver manje za održavati.
 
-Postgres se odlikuje i po naprednoj tokenizaciji. Osim standardnih vrsta tokena (riječi i brojevi), Postgres sprema u zasebne tokene i emailove, linkove i još mnogo drugih tipova objekata.
+Postgres se odlikuje po naprednoj tokenizaciji. Osim standardnih vrsta tokena (riječi i brojevi), Postgres sprema u zasebne tokene i emailove, linkove i još mnogo drugih tipova objekata.
 
 \subsubsection{Nedostaci}
 
@@ -574,7 +574,7 @@ Glavni nedostatak Postgresa je što, u usporedbi s ostalim tražilicama punog te
 
 Primerice, Postgres ne prepoznaje booleove upite kakve bi ih korisnik napisao; on zahtijeva da između svake riječi postoji operator. Nema ni direktnu podršku za fraze, nego fraze treba ekstrahirati iz upita i staviti u dodatan SQL upit. Nadalje, Postgres ima funkciju za sličnost dviju riječi, ali ju je nemoguće iskoristiti za ispravljanje zatipaka, osim kada je upit jedna riječ (\cite{goodenough}). Također, Postgres nema podršku za TF-IDF metodu rangiranja.
 
-Pretraživanje kroz više tablica (preko stranih ključeva) se u Postgresu ne može indeksirati. Jedan način kako se to može zaobići je indeksiranjem i pretraživanjem svake tablice posebno, te spajanjem rezultata pomoću stranih ključeva. Međutim, tada je vrlo teško izračunati sveukupnu relevantnost glavnog dokumenta. Drugi način kako se to može zaobići jest denormalizacijom baze. Međutim, to narušava arhitekturu baze podataka i otežava čuvanje integriteta i generalno održavanje.
+Pretraživanje kroz više tablica (preko stranih ključeva) se u Postgresu ne može indeksirati. Jedan način kako se to može zaobići je indeksiranjem i pretraživanjem svake tablice posebno, te spajanjem rezultata pomoću stranih ključeva. Međutim, tada je vrlo teško izračunati sveukupnu relevantnost glavnog dokumenta. Drugi način kako se to može zaobići jest denormalizacijom baze. Međutim, to narušava dizajn baze podataka i otežava čuvanje integriteta i generalno održavanje.
 
 Postgres ne podržava normalizaciju dijakritičkih znakova u kombinaciji s korjenovanjem, kada se koristi jezik kojemu su dijakritički znakovi dio gramatike (npr. hrvatski). To je zato što se zbog tehničkih nedostataka normalizacija dijakritičkih znakova može izvršiti jedino prije korjenovanja. To znači da će sve riječi u trenutku korjenovanja biti bez dijakritičkih znakova, pa rječnik korišten za korjenovanje neće velik broj riječi uopće prepoznati kao hrvatske te ih neće korjenovati. Čak i da nema ovog nedostatka, normalizacija dijakritičkih znakova se nativno ne može indeksirati, što tu značajku čini neupotrebljivom.
 
@@ -607,7 +607,7 @@ Neke od poznatijih organizacija koje koriste Elasticsearch su Wikipedia, The Gua
 
 \subsubsection{Prednosti}
 
-HTTP API Elasticsearcha je vrlo napredan i opsežan. Primjerice, cijelo administriranje je moguće provoditi isključivo preko HTTP API-a. Također, arhitektura i dizajn URL-ova su moderni i slijede najbolje prakse – \textit{REST}\footnote{\url{https://www.ics.uci.edu/~fielding/pubs/dissertation/rest_arch_style.htm}}. Međutim, HTTP API je samo jedan način komuniciranja s Elasticsearchom. Ukoliko je aplikacija koja koristi Elasticsearch napisana u Javi ili jeziku koji može komunicirati sa Javom, umjesto HTTP API-a moguće koristiti Java API direktno (što je brže).
+HTTP API Elasticsearcha je vrlo napredan i opsežan. Primjerice, cijelo administriranje je moguće provoditi isključivo preko HTTP API-a. Također, arhitektura i dizajn URL-ova su moderni i slijede najbolje prakse – \textit{REST}\footnote{\url{https://www.ics.uci.edu/~fielding/pubs/dissertation/rest_arch_style.htm}}. Međutim, HTTP API je samo jedan način komuniciranja s Elasticsearchom. Ukoliko je aplikacija koja koristi Elasticsearch napisana u Javi ili jeziku koji može komunicirati sa Javom, umjesto HTTP API-a moguće je koristiti Java API direktno (što je brže).
 
 Za razliku od većine tražilica punog teskta, Elasticsearch sam upravlja replikacijama i cijepanju u skladu s količinom i frekvencijom zahtjeva. To je velika prednost, jer smanjuje količinu potrebnog administriranja, i čini skaliranje na više računala jednostavnijim.
 
@@ -623,7 +623,45 @@ Elasticsearch ima nativno podržanu funkcionalnost automatskog nadopunjavanja, k
 
 Elasticsearch nema nativnu podršku za rangiranje rezultata s obzirom na blizinu pronađenih riječi iz upita, što može smanjiti relevantnost rezultata. Međutim, postoji način da se ta funkcionalnost djelomično postigne. Nakon originalnog upita, moguće je ``popraviti'' relevantnost vraćenih dokumenata ponovnim izvršavanjem istog upita, ali ovaj puta ga tretirajući kao frazni upit s olabavljenim zahtjevom razmaka između riječi (u bilo kojem smjeru, tako da se riječi iz upita ne moraju u dokumentu pojaviti danim redoslijedom) (\cite{elasticguide} \textit{Proximity Matching}). Tako se npr. može popraviti relevantnost svih dokumenata u kojima se riječi iz upita pojavljuju u međusobnoj udaljenosti od unutar 100 riječi. Ta metoda će funkcionirati za jednostavne upite, ali neće za složene (jer se u ovoj metodi cijeli upit tretira kao fraza, pa će se npr. booleovi operatori shvaćati doslovno kao riječi).
 
+\chapter{Komercijalne tražilice}
+
+Do sada smo pričali o tražilicama punog teksta koje se mogu koristiti za vlastite web aplikacije, ali samo o onima otvorenog kôda. Međutim, moguće je koristiti i postojeće komercijalne tražilice (Google, Bing itd.) unutar vlastite web aplikacije. Iako smo u uvodu spomenuli da komercijalne tražilice više najčešće nisu potrebne, one još uvijek imaju neke prednosti nad besplatnima. Za usporedbu ćemo uzeti Google tražilicu, budući da je ona daleko najpopularnija od svih komercijalnih (slika \ref{google}).
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=300pt]{google}
+  \caption{Google tražilica integrirana u neku web aplikaciju}
+  \label{google}
+\end{figure}
+
+Glavne značajke integrirane Google tražilice su:
+
+\begin{compactitem}
+  \item mogućnost oblikovanja dizajna rezultata i polja za pretraživanje, uključujući i dodavanje vlastitih slika,
+  \item pretraživanje kroz različite jezike (moguće je pronaći tekst na jednom jeziku s upitom napisanim na drugom jeziku),
+  \item rangiranje dokumenata po datumu zadnjeg ažuriranja,
+  \item XML API za maksimalnu fleksibilnost prikaza rezultata,
+  \item kategoriziranje dokumenata te omogućavanje korisnicima da filtriraju po tim kategorijama,
+  \item mogućnost pretraživanja slika,
+  \item rezultati bez reklama,
+  \item indeksiranje na zahtjev, npr. kada se neki URL promjeni,
+  \item podrška za sinonime i akronime te
+  \item mogućnost promoviranja sadržaja kod automatskog nadopunjavanja (\cite{google}).
+\end{compactitem}
+
+Glavna prednost integrirane Google tražilice je da Google ima naprednu, poznatu i intuitivnu sintaksu za upite već gotovu. Stoga s Google tražilicom korisnici mogu pisati sve one tipove upita na kakve su već navikli. Također, podrška za korjenovanje, sinonime, akronime i normalizaciju dijakritičkih znakova iz svih jezika je već ugrađena u tražilicu, pa nije potrebno ništa podešavati.
+
+Glavni nedostatak Google tražilice je da ne omogućava potpunu fleksibilnost vraćanja i prikaza rezultata. Google je vrlo dobar u analiziranju HTML stranice i izdvajanju bitnih dijelova teksta. Što web stranica ima bolje strukturiran HTML, to će Google bolje napraviti svoju analizu. Međutim, on nikad neće znati od kojih se točno polja sastoje dokumenti na stranici (i kojih sve tipova dokumenata ima). To znači da u rezultatima vraćenim XML API-om nećemo moći dobiti dobro strukturirane podatke, što ograničava fleksibilnost prikaza rezultata.
+
 \chapter{Zaključak}
+
+Apache Solr nastoji biti gotova platforma za pretraživanje punog teksta, te ima puno ugrađenih naprednih funckonalnosti. Međutim, za vrijeme razvijanja počeo se granati u previše različitih smjerova, od kojih niti jedan nije postao onaj pravi, i nije imao prioritet ostati moderan. To otežava učenje i korištenje Solra, i ne vjerujem da će se još dugo koristiti.
+
+Sphinx se htio usko vezati za postojeće relacijske baze, s ciljem da što više pojednostavni indeksiranje. Međutim, Sphinx se nije orijentirao na lako korištenje, već će on raditi jako dobro tek kada se pažljivo i detaljno konfigurira. Vjerujem da će tvrtke koje su do sada uložile vremena u Sphinx ostati pri njemu, ali mislim da će Sphinx teže zainteresirati nove korisnike.
+
+PostgreSQL je, uz već postojeću odličnu funkcionalnost najnaprednije relacijske baze podataka otvorenog kôda, odlučio pružiti korisnicima i mogućnosti pretraživanja punog teksta. Dok je vrlo pogodno imati tu funkcionalnost direktno u glavnoj bazi podataka, razina na kojoj se s tim alatima mora raditi je preniska za naprednije pretraživanje punog teksta. PostgreSQL će se još dugo nastaviti razvijati kao relacijska baza podataka, ali mislim da se podrška za pretraživanje punog teksta više neće puno mijenjati.
+
+Elasticsearch kao dokumentno-orijentirane baza podataka sadrži vrlo napredne vrste upita i indeksiranja koji se mogu kombinirati, a istovremeno ostaje vrlo lak za korištenje i skaliranje, favorizirajući konvenciju preko konfiguracije. Zbog izvrsne dokumentacije i držanja svog kôda na GitHub-u (web aplikaciji koja omogućava svakome da prati i sudjeluje u razvijanju softvera), vjerujem da će Elasticsearch među softverima otvorenog kôda nastaviti biti najbolja platforma za pretraživanje punog teksta.
 
 \begin{thebibliography}{99}
   \bibitem{taming} G. S. Ingersoll, T. S. Morton, A. L. Farris, \textit{Taming Text: How to Find, Organize, and Manipulate It}, Manning Publications Co, New York, 2013.
@@ -635,19 +673,32 @@ Elasticsearch nema nativnu podršku za rangiranje rezultata s obzirom na blizinu
   \bibitem{elasticref} C. Gormley, Z. Tong, dostupno na \url{http://www.elastic.co/guide/en/elasticsearch/reference/current/index.html} (travanj, 2015)
   \bibitem{metaphone} \url{http://en.wikipedia.org/wiki/Metaphone} (travanj, 2015)
   \bibitem{fuzzy} \url{https://www.found.no/foundation/fuzzy-search/} (travanj, 2015)
-  \bibitem{damerau} \url{http://en.wikipedia.org/wiki/Damerau–Levenshtein_distance} (travanj, 2015)
+  \bibitem{damerau} \url{http://en.wikipedia.org/wiki/Damerau-Levenshtein_distance} (travanj, 2015)
   \bibitem{goodenough} \url{http://blog.lostpropertyhq.com/postgres-full-text-search-is-good-enough/} (travanj, 2015)
+  \bibitem{google} \url{https://www.google.com/work/search/products/gss.html} (travanj, 2015)
 \end{thebibliography}
 
 \pagestyle{empty}
 
 \begin{sazetak}
+  Zbog sve većeg rasta digitalnih informacija, potrebne su napredne tehnike pretraživanja velikih količina teksta. Tradicionalno su relacijske baze podataka obavljale posao pretraživanja informacija, ali one su dobre samo za strukturirano i diskretno pretraživanje. Pretraživanje punog teksta zahtijeva tehnike napredne obrade teksta, kako bi se mogao dati odgovor na pitanje \textit{koliko} dani upit odgovara nekom dokumentu.
+
+  Pretraživanje punog teksta zahtijeva da se tekst informacija unaprijed obradi, kako bi se moglo omogućiti što brže izvršavanje upita. Tako se tekst najprije rastavlja na rečenice, a rečenice na tokene, što svodi pretraživanje teksta na pretraživanje liste tokena. Zatim se tim tokenima sva slova pretvore u mala i normaliziraju se dijakritički znakovi, što pojednostavljuje potrebne znakove za upit. Nakon toga se eliminiraju sve stop-riječi (riječi koje ne donose semantičko značenje) te se sve riječi korjeniziraju, što omogućava da riječ iz upita pronađe sve dokumente koji sadrže bilo koju varijaciju te riječi (npr. po brojnosti i padežu). Zatim se ta obrađena lista tokena sprema u strukturu koja se zove \textit{indeks}, i koja se koristi pri kasnijim upitima.
+
+  Nakon indeksiranja moguće je raditi upite na stvoreni indeks. Sam tekst upita najprije prolazi kroz istu transformaciju kao i indeks, s time da se još svaka riječ proširuje njenim sinonimima, da bi se pronašao što veći broj relevantnih dokumenata. Zatim se tekst upita analizira za potencijalne fraze (niz riječi unutar dvostrukih navodnika), booleove operatore, zamjenske znakove i regularne izraze. U upit je moguće uključiti i strukturirano pretraživanje specificiranjem polja. Za vrijeme upisivanja upita, korisno je korisniku ponuditi prozor koji automatski predviđa više nastavaka njegovog upita. Za vrijeme izršavanja upita je dobro i tolerirati neke eventualne zatipke.
+
+  Konačno budući da kod ovakvih pretraživanja često velik broj dokumenata odgovara upitu, potrebno je rangirati dokumente po relevantnosti, na koju se može utjecati na mnogo načina. Osim automatske relevantnosti temeljene na broju pojavljivanja ključnih riječi u dokumentu, moguće je odrediti da su neka polja dokumenta važnija od drugih (npr. naslov), pa rangirati upit koji je pronađen u naslovu više od onog koji je pronađen u tijelu dokumenta. Također je dobro rangirati i dokumente po redoslijedu i međusobnoj blizini riječi iz upita.
+
+  Dugo vremena su se za pretraživanje unutar web stranica koristile komercijalne tražilice poput Googlea. Međutim, kroz zadnjih 5 godina razvio se velik broj tražilica punog teksta otvorenog kôda. Najpoznatije su Apache Solr, Sphinx, PostgreSQL (koji je dobio podršku za pretraživanje punog teksta) i Elasticsearch. Kroz testiranje i analizu značajki pokazalo se da je među njima prevladao Elasticsearch.
+
+  Velik broj ljudi svakidašnje koristi kvalitetne tražilice kao što je Googleova, i postaje zadatak ostalih web stranica da kvalitetu svojeg pretraživanja pokušaju što više približiti tom standardu.
 \end{sazetak}
 
 \begin{summary}
 \end{summary}
 
 \begin{cv}
+  Rođen sam 10. ožujka 1991. godine u Zagrebu. Nakon završetka Waldorfske škole u Zagrebu upisao sam se u XV. gimnaziju isto u Zagrebu. Maturirao sam 2009. godine te sam odmah upisao preddiplomski studij matematike, inženjerski smjer, na Matematičkom odjseku Prirodoslovno-Matematičkog fakulteta u Zagrebu. 2012. godine stekao sam titulu prvostupnika matematike, nakon čega sam upisao diplomski studij Računarstva i matematike na istom fakultetu.
 \end{cv}
 
 \end{document}
