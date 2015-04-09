@@ -33,6 +33,11 @@
 % Specificiranje tipa numeriranja
 \usepackage{enumerate}
 
+% Programski kod
+\usepackage{listings}
+% Bolji verbatim
+\usepackage{fancyvrb}
+
 % Omogući slike
 \usepackage{graphicx}
 % Omogući popis slika
@@ -59,9 +64,9 @@ Bez mogućnosti kvalitetnog pretraživanja korisnik najčešće neće moći pron
 
 Budući da se informacije obično sastoje od velikih količina teksta, ovaj rad bit će orijentiran na tzv. \textit{pretraživanje punog teksta} (eng. \textit{full-text search}). Za kvalitetno pretraživanje punog teksta, nažalost, općenito nisu dovoljne klasične relacijske baze podataka (MySQL, Microsoft SQL Server, Oracle). Dok su takve baze podataka vrlo efikasne za pretraživanje po diskretnim vrijednostima polja, one obično ne mogu odrediti \textit{koliko} neki dokument ispunjava određeni tekstualni upit. Točnije, ne znaju efikasno odrediti koja polja dokumenta ispunjavaju koliki dio upita, i tako odrediti koliko je taj dokument relevantan upitu. Iako klasične baze podataka podržavaju regularne izraze, kvalitetno pretraživanje punog teksta zahtijeva više od jednostavnog uspoređivanja znakova. Tražilice punog teksta trebale bi moći unaprijed obraditi tekst da maksimalno ubrzaju vrijeme izvršavanja upita. Isto tako, trebale bi moći ispraviti eventualne zatipke (eng. \textit{typo}) korisnika, i ne ograničavati se na specifične padeže i veličine slova. Konačno, takve tražilice trebale bi moći vratiti rezultate rangirane po tome koliko odgovaraju upitu. U sljedećim poglavljima obradit ćemo glavne značajke pretraživanja punog teksta.
 
-Kako bi svojim korisnicima pružila mogućnost pretraživanja, aplikacija može izabrati ili sama implementirati svoju tražilicu, ili koristiti jedan od već postojećih softvera za to. Budući da je danas kvaliteta javno dostupnih tražilica dosegla razinu gdje je dovoljna za vodeće svjetske aplikacije, nema razloga ne odlučiti se za potonju opciju. U radu će biti spomenuti i obrađeni svi vodeći softveri za pretraživanje i to isključivo oni otvorenog kôda (eng. \textit{open source}). Naime, tražilice otvorenog kôda pokazale su se kao izvrsno funkcionalne i za svjetski popularne aplikacije (npr. Wikipedia), pa u većini slučajeva nema potrebe za korištenjem komercijalnih.
+Kako bi svojim korisnicima pružila mogućnost pretraživanja, aplikacija može izabrati ili sama implementirati svoju tražilicu, ili koristiti jedan od već postojećih softvera za to. Budući da je danas kvaliteta javno dostupnih tražilica dosegla razinu gdje je dovoljna za vodeće svjetske aplikacije, nema razloga ne odlučiti se za potonju opciju. Od postojećih tražilica mogu se izabrati komercijalne (npr. Google) ili one otvorenog kôda. Međutim, tražilice otvorenog kôda pokazale su se kao izvrsno funkcionalne i za svjetski popularne aplikacije (npr. Wikipedia), pa u većini slučajeva nema potrebe za korištenjem komercijalnih.
 
-Praktični dio ovog rada sastojat će se implementacije pretraživanja u svakoj od vodećih tražilica punog teksta. Program će testirati koje sve značajke obrađene u sljedećem poglavlju podržava pojedina tražilica. Direktno iskustvo sa svakom tražilicom je potrebno da bi se dobilo što bolje razmijevanje tih softvera. Kombinacijom tog iskustva i dokumentacije iznijet ću glavne prednosti i nedostatke svakog softvera, i zaključiti koji je od njih najbolji.
+Praktični dio ovog rada sastojat će se implementacije pretraživanja u svakoj od vodećih tražilica punog teksta. Program će testirati koje sve značajke obrađene u sljedećem poglavlju podržava pojedina tražilica. Direktno iskustvo sa svakom tražilicom je potrebno da bi se dobilo što bolje razmijevanje tih softvera. Kombinacijom tog iskustva i dokumentacije iznijet ću glavne prednosti i nedostatke svake tražilice, i zaključiti koja je od njih najbolja. Koristit će se isključivo tražilice otvorenog kôda, a na kraju ćemo spomenuti i neke prednosti komercijalnih.
 
 \chapter{Pretraživanje} \label{searching}
 
@@ -218,6 +223,8 @@ Aplikacije mogu najprije početi s blažim korjenovanjem, zatim ga napraviti agr
 
 Nakon što se svi dokumenti tokeniziraju, i ti tokeni normaliziraju obradama navedenim u prethodnom potpoglavlju, novonastali \textit{termi} (normalizirani tokeni) spremaju se na disk. Konkretno, spremaju se u strukturu zvanu \textit{invertirani indeks} (slika \ref{inverted_index}), koja je optimizirana za brzo pronalaženje dokumenata po termovima. Budući da lista termova ne odgovara u potpunosti listi riječi u odgovarajućem dokumentu (jer su odstranjene stop-riječi), u invertirani indeks sprema se još i pozicija svakog terma unutar dokumenta, kako bi se omogućile značajke poput pretraživanja po frazama (\cite{taming} str. 41).
 
+\newpage
+
 \begin{figure}[H]
   \centering
   \includegraphics[width=300pt]{inverted_index}
@@ -258,7 +265,7 @@ Kada bi se sve riječi tražile doslovno, upit poput ``New Yrok'' najvjerojatnij
 
 Da tražilica može ispraviti zatipke, mora moći prepoznati kada se vjerojatno radi o zatipku, a kada o različitoj riječi. Za to mora znati koliko su neke dvije riječi ``slične''. Postoje tri vrste mjere sličnosti koje su u upotrebi. Prva vrsta je \textit{udaljenost po izmjenama}, od kojih je najpoznatija \textit{Damerau-Levenshteinova udaljenost}. Damerau-Levenshteinova udaljenost mjeri sličnost dviju riječi izračunavanjem minimalnog broja izmjena koje je potrebno napraviti na jednoj riječi da bi se dobila druga. Te izmjene se dijele u 4 vrste: umetanje, brisanje, supstitucija i transpozicija. Umetanje dodaje slovo na bilo koje mjesto unutar riječi, brisanje briše jedno slovo iz riječi, supstitucija zamjenjuje jedno slovo s drugim, a transpozicija zamjenjuje redoslijed dva susjedna slova (\cite{taming} str. 89 i \cite{elasticguide} \textit{Fuzziness}). Što je manji broj takvih izmjena potrebno da bi se jedna riječ transformirala u drugu, to su te dvije riječi sličnije. U praksi se obično ne upotrebljava Damerau-Levenshteinova udaljenost veća od 2. Jedan razlog tome je što bi računanje Damerau-Levenshteinove udaljenosti veće od 2 bilo vremenski preskupo. Drugi razlog je taj što je Damerau uočio da 80\% ljudskih zatipaka imaju Damerau-Levenshteinovu udaljenost 1 (\cite{damerau}), što znači da udaljenost 3 najvjerojatnije više nije rezultat zatipka.
 
-Druga vrsta mjere za sličnost riječi je \textit{n-gram udaljenost}. Ranije smo radili s \textit{n}-gramima na razini riječi, ali ovaj puta ćemo promatrati \textit{n}-grame na razini slova. \textit{n}-gram udaljenost mjeri sličnost dviju riječi tako da gleda broj njihovih zajedničkih \textit{n}-grama (\cite{taming} str. 99). Dvije riječi su sličnije što više zajedničkih \textit{n}-grama imaju. Jedna prednost \textit{n}-gram udaljenosti u odnosu na Damerau-Levenshteinovu jest da \textit{n}-gram udaljenost penalizira greške u prvim slovima više nego u ostalim slovima u riječi (\cite{taming} str. 92). I to je u upravo u skladu sa načinom na koji se zatipci i rade. Naime, autor teksta neće se skoro nikad napraviti zatipak u prvom ili drugom slovu (jer se takva greška lako uoči), već će ga najčešće napraviti u kasnijim slovima. Ako uspoređujemo dvije riječi i postoji razlika u prvom i/ili drugom slovu, tada se najvjerojatnije ne radi o dvije iste riječi od kojih jedna ima zatipak, već o različitim riječima. U praksi se pokazalo da najbolje rezultate daje promatranje zajedničkih \textit{trigrama} (\cite{postgres} \textit{pg\_trgm}).
+Druga vrsta mjere za sličnost riječi je \textit{n-gram udaljenost}. \textit{n}-gram je bilo koji \textit{n}-člani podniz uzastopnih elemenata nekog niza. \textit{n}-gram udaljenost mjeri sličnost dviju riječi tako da gleda broj njihovih zajedničkih \textit{n}-torki slova (\cite{taming} str. 99). Dvije riječi su sličnije što više zajedničkih \textit{n}-grama imaju. Jedna prednost \textit{n}-gram udaljenosti u odnosu na Damerau-Levenshteinovu jest da \textit{n}-gram udaljenost penalizira greške u prvim slovima više nego u ostalim slovima u riječi (\cite{taming} str. 92). I to je u upravo u skladu sa načinom na koji se zatipci i rade. Naime, autor teksta neće se skoro nikad napraviti zatipak u prvom ili drugom slovu (jer se takva greška lako uoči), već će ga najčešće napraviti u kasnijim slovima. Ako uspoređujemo dvije riječi i postoji razlika u prvom i/ili drugom slovu, tada se najvjerojatnije ne radi o dvije iste riječi od kojih jedna ima zatipak, već o različitim riječima. U praksi se pokazalo da najbolje rezultate daje promatranje zajedničkih \textit{trigrama} (\cite{postgres} \textit{pg\_trgm}).
 
 Osim sličnosti po slovima, postoje i algoritmi za sličnosti među riječima po \textit{zvučnosti}, i to je treća vrsta mjere. Originalni algoritam je \textit{Soundex}, koji funkcionira tako da svakoj riječi pridruži niz znakova, koji označava njenu ``zvučnost'' te se ti znakovi onda mogu uspoređivati. Soundex radi samo za engleski jezik. Soundex je zatim razvijen u \textit{Metaphone}, koji poboljšava algoritam tako da koristi informaciju varijacija i nedosljednosti engleskog jezika da proizvede točniji niz znakova. Sljedeća verzija Metaphonea je nazvana \textit{Double Metaphone}. Glavna stvar koju Double Metaphone dodaje je prva podrška za ne-engleske vrste jezika: slavenski, germanski, keltski, grčki, francuski, talijanski, španjolski i kineski (\cite{metaphone}).
 
@@ -268,7 +275,7 @@ Niti jedna od te tri mjere udaljenosti nije najbolja, te bi svaka tražilica tre
 
 Pretpostavimo da radimo aplikaciju koja omogućuje korisnicima da gledaju riječi pjesama. Pretpostavimo sada da korisnik želi iskoristiti tu aplikaciju da pronađe naziv i autora pjesme na temelju fraza koje je zapamtio iz slušanja te pjesme. Ako korisnik upiše te fraze iz pjesme kao običan niz ključnih riječi, postoji vjerojatnost da će rezultati uključivati i druge pjesme koje sadrže te ključne riječi pa možda pjesma koju korisnik traži neće biti na prvom mjestu. S druge strane, kada bi korisnik mogao reći tražilici da se određeni nizovi riječi iz upita nalaze u dokumentima točno tim redoslijedom, broj vraćenih pjesama se može znatno smanjiti (jer je puno manja vjerojatnost da dvije pjesme dijele čitavu frazu) i puno je vjerojatnije da će tražena pjesma biti prvi rezultat.
 
-Niz ključnih riječi može se označiti kao fraza tako da se omeđi dvostrukim navodnicima (slika \ref{phrases}). Tražilica pretražuje dokumente za frazu pomoću tzv. \textit{n}-grama. \textit{n}-gram je bilo koji \textit{n}-člani podniz uzastopnih elemenata nekog niza. Radi brzine se najprije s manjim \textit{n}-gramima odredi na kojim mjestima je najvjerojatnije da se fraza nalazi te se zatim ispituju zabilježena mjesta (\cite{taming} str. 31).
+Niz ključnih riječi može se označiti kao fraza tako da se omeđi dvostrukim navodnicima (slika \ref{phrases}). Tražilica pretražuje dokumente za frazu pomoću \textit{n}-grama. Ranije smo radili s \textit{n}-gramima na razini slova, ali ovdje se \textit{n}-grami koriste na razini riječi. Radi brzine se najprije s manjim \textit{n}-gramima odredi na kojim mjestima je najvjerojatnije da se fraza nalazi te se zatim ispituju zabilježena mjesta (\cite{taming} str. 31).
 
 \begin{figure}[H]
   \centering
@@ -279,7 +286,7 @@ Niz ključnih riječi može se označiti kao fraza tako da se omeđi dvostrukim 
 
 \subsection{Booleovi operatori}
 
-Ranije smo spomenuli da za upit ključnim riječima većina tražilica vraća isključivo dokumente koji sadrže \textit{sve} unešene ključne riječi. Međutim, ako primjerice korisnik koristi online dućan mobilnih telefona, i želi pretražiti sve modele Samsunga i iPhonea, tražilica bi trebala omogućiti korisniku da potraži sve dokumente koji sadrže riječ ``iphone'' \textit{ili} ``samsung''.
+Ranije smo spomenuli da za upit ključnim riječima većina tražilica vraća sve dokumente koji sadrže neku od ključnih riječi (s tim da su rangirani više oni koji sadrže više ključnih riječi). Međutim, ako primjerice korisnik želi pronaći sve knjižnice u Zagrebu, htio bi da su rezultati isključivo dokumenti koji sadrže obje riječi ``knjižnica'' i ``zagreb''.
 
 Zato tražilice obično omogućuju da se između ključnih riječi stave tzv. \textit{Booleovi operatori} (slika \ref{boolean}). Operator \textbf{AND} znači da desna i lijeva ključna riječ moraju \textit{obje} biti sadržane u dokumentu, operator \textbf{OR} znači da dokument mora sadržavati \textit{barem jednu} od omeđujućih ključnih riječi, dok operator \textbf{NOT} znači da dokument \textit{ne smije} sadržavati ključnu riječ koja slijedi. Moguće je i korištenje zagrada za gradnju složenijih booleovih izraza.
 
@@ -364,7 +371,7 @@ Ideja modela vektorskog polja je promatranje dokumenata kao vektore u \textit{n}
   \item ``Janica Kostelić odnosi pobjedu u svjetskom prvenstvu''
 \end{compactenum}
 
-Tada modeliramo ova dva dokumenta kao vektore u $10$-dimenzionalnom vektorskom prostoru (budući da unija tokena iz gornja dva dokumenta čini $10$-člani skup). Budući da su dokumenti zapravo niz tokena, možemo ih promatrati kao vektore u tom vektorskom prostoru kojemu je dimenzija \textit{k} jednaka $1$, ako token \textit{k} postoji u dokumentu, ili $0$, ako token ne postoji u dokumentu. Neka numeriramo tokene iz našeg primjera na sljedeći način:
+Tada modeliramo ova dva dokumenta kao vektore u $10$-dimenzionalnom vektorskom prostoru (budući da unija tokena iz gornja dva dokumenta čini $10$-člani skup). Budući da su dokumenti zapravo niz tokena, možemo ih promatrati kao vektore u tom vektorskom prostoru kojemu je \textit{k}-ta komponenta jednaka $1$ ako token \textit{k} postoji u dokumentu, ili $0$ ako token ne postoji u dokumentu. Neka numeriramo tokene iz našeg primjera na sljedeći način:
 
 \begin{center}
   \begin{tabular}{@{\enspace}c@{\enspace}c@{\enspace}c@{\enspace}c@{\enspace}c@{\enspace}c@{\enspace}c@{\enspace}c@{\enspace}c@{\enspace}c@{\enspace}}
@@ -454,7 +461,7 @@ Dok nadogradnja jednog računala može puno pomoći, performanse koje se mogu po
 
 \begin{compactenum}
   \item \textit{Replikacija} – Jedan indeks koji stane na jedno računalo se može kopirati na više računala. Na taj način se opterećenje može distribuirati po više računala. To je vrlo korisno kada je indeks relativno mali, ali je broj upita vrlo velik.
-  \item \textit{Cijepanje} – Jedan indeks se može rascijepati u više dijelova (eng. \textit{shards}) te se svaki dio stavlja na zasebno računalo. Cijepanje indeksa obično internalno izvršava tražilica, ali indeks je moguće rascijepati i po logičkom pravilu (npr. po govornom jeziku).
+  \item \textit{Cijepanje} – Jedan indeks se može rascijepati u više dijelova (eng. \textit{shards}) te se svaki dio stavlja na zasebno računalo. Cijepanje indeksa obično interno izvršava tražilica, ali indeks je moguće rascijepati i po logičkom pravilu (npr. po govornom jeziku).
 \end{compactenum}
 
 \chapter{Implementacija}
@@ -491,13 +498,13 @@ Glavne značajke Apache Lucene uključuju:
 
 Lucene ugrubo funkcionira na sljedeći način. Prvo se inicijaliziraju dokumenti koji mogu imati jedno ili više polja. Zatim se specificira analizator dokumenata, koji će tokenizirati dokumente po poljima (ne mora se nužno koristiti analizator koji dolazi s Apache Lucene), kodek koji će kodirati i dekodirati iz invertiranog indeksa, i način kako će se indeks spremati (na disku, u memoriji itd.). Nakon toga se može napraviti upit, koji prvo prolazi kroz razne analizatore (fraze, booleovi operatori itd), nakon čega se uspoređuje s indeksom i rezultira pronađenim dokumentima (\cite{lucene} \textit{Introduction to Lucene's APIs}).
 
-Apache Lucene nije bio korišten direktno u praktičnom dijelu (jer on ionako nije namijenjen da se direktno koristi u aplikacijama), ali ga internalno koriste Apache Solr i Elasticsearch.
+Apache Lucene nije bio korišten direktno u praktičnom dijelu (jer on ionako nije namijenjen da se direktno koristi u aplikacijama), ali ga interno koriste Apache Solr i Elasticsearch.
 
 \subsection{Apache Solr}
 
 \textit{Apache Solr} je platforma za pretraživanje punog teksta sagrađena na Apache Lucene, napisana u Javi i javno distribuirana pod licencom ``Apache License 2.0''.
 
-Solr se koristi tako da se pokrene kao web aplikacija te se s njom komunicira preko HTTP protokola (koristeći formate JSON, XML ili CSV). Neki od glavnih URL-ova iz Solr-ovog HTTP API-a su:
+Solr se koristi tako da se pokrene kao web aplikacija te se s njom komunicira preko HTTP protokola (koristeći formate JSON, XML ili CSV). Neki primjeri HTTP zahtjeva na Solr-ovo HTTP API su:
 
 \begin{description}
   \item[\texttt{POST /solr/update}] \hfill \\ Za dodavanje novih, ažuriranje i brisanje postojećih dokumenata iz indeksa.
@@ -512,15 +519,82 @@ Budući da je sagrađen na Apache Lucene, Solr nativno podržava kompleksne upit
 
 Solr ima nativnu podršku za upravljanje valutama. Na primjer, može odrediti o kojoj se valuti radi iz simbola, i može raditi automatske konverzije (\cite{solr} str. 47).
 
-Automatsko nadopunjavanje je također dobro podržano u Solru. Postoji poseban dio API-a koji je baš namijenjen za tu funkcionalnost, te je optimiziran za brzinu. Također ima nativnu podršku za ispravljanje zatipaka.
+Automatsko nadopunjavanje je također dobro podržano u Solru. Postoji poseban dio API-a koji je baš namijenjen za tu funkcionalnost (vidi sliku \ref{solr-typeahead}) te je optimiziran za brzinu. Također ima nativnu podršku za ispravljanje zatipaka.
+
+\begin{figure}[H]
+  \centering
+  \fbox{\texttt{http://localhost:8983/solr/type-ahead?q=appl}}
+  \caption{Automatsko nadpounjavanje u Solr-u za početak upita ``appl''}
+  \label{solr-typeahead}
+\end{figure}
 
 \subsubsection{Nedostaci}
 
-Glavni nedostatak Solra je što ima velik broj modova u kojima se može pokrenuti. Solr se može pokrenuti u modu \textit{default}, \textit{cloud}, \textit{dih}, \textit{schemaless} i \textit{multicore}. To decentralizira Solr i znatno komplicira njegovo korištenje, jer se u svakom modu razičite funkcionalnosti implementiraju na različit način. I to nije uvijek napomenuto u dokumentaciji, tako da je ponekad potrebno puno vremena da se pronađe uzrok nefunkcioniranja određene konfiguracije.
+Glavni nedostatak Solra je što ima velik broj modova u kojima se može pokrenuti, te uopće nije jasno koji bi se trebao koristiti. Solr dolazi s primjerima \textit{cloud}, \textit{techproducts}, \textit{dih}, \textit{schemaless}, koji prekonfigurirani s tim različitim modovima (vidi sliku \ref{solr-modes}). U dokumentaciji se potiče pokretanje Solra s tim primjerima, međutim nije jasno zašto su ti oni korisni, jer sadrže puno konfiguracije specifične za te primjere koje korisnik općenito ne želi za svoje dokumente. Ti modovi decentraliziraju Solr i znatno kompliciraju njegovo korištenje, jer se u svakom modu razičite funkcionalnosti implementiraju na različit način (npr. moguće je programatski dodati novi tip dokumenta samo u \textit{SolrCloud} modu).
 
-Solrov dizajn URL-ova je zastario i nije dosljedan, što otežava učenje njegovih funkcionalnosti. To se odražava u njihovom vodiču za početnike, gdje je za indeksiranje dokumenata, umjesto običnog alata za rađenje HTTP zahtjeva, korištena specijalizirana Java biblioteka koja to ``pojednostavljuje''. Također, Solr ima 2 različite dokumentacije, koje opisuju iste komponente, te nije jasno koju bi trebalo čitati.
+\begin{figure}[H]
+  \centering
+  \fbox{\parbox{\textwidth}{\footnotesize\fontfamily{ppl}\selectfont
+    \textbf{cloud}: Ovaj primjer pokreće \textit{SolrCloud} klaster od 1-4 čvorova. Pri inicijalizaciji Solr će nam postaviti velik broj pitanja na niskom nivou o tome kakvu želimo internu strukturu Solr-a pokrenuti (eng. \textit{nodes}, \textit{ports}, \textit{shards} itd.).
 
-Solr se konfigurira direktnim ažuriranjem konfiguracijskih datoteki koje se nalaze u instalacijskom direktoriju, umjesto da se ta funkcionalnost implementira u HTTP API-u. To otežava automatizaciju konfiguracije; drugim riječima, teško je napisati program koji će ažurirati konfiguraciju. Također, Solr za konfiguraciju koristi zastarjeli format XML, koji se teže čita od današnjeg standarda, JSON-a.
+    \medskip
+
+    \textbf{techproducts}: Ovaj primjer pokreće Solr u \textit{samostalnom} modu, koji ne radi neke specijalne konfiguracije.
+
+    \medskip
+
+    \textbf{dih}: Ovaj primjer pokreće Solr u samostalnom modu sa DataImportHandler-om (DIH) omogućenim, koji može prebaciti podatke iz relacijskih baza u Solr.
+
+    \medskip
+
+    \textbf{schemaless}: Ovaj primjer pokreće Solr u samostalnom modu s vođenom shemom, što dopušta da ažuriramo shemu (npr. polja dokumenata) programatski.
+  }}
+  \caption{Primjeri s kojima se Solr može pokrenuti (\cite{solr} str. 16)}
+  \label{solr-modes}
+\end{figure}
+
+Solrov dizajn URL-ova je zastario i nije dosljedan (vidi sliku \ref{solr-urls}), što otežava učenje njegovih funkcionalnosti. To se odražava u njihovom vodiču za početnike, gdje se za indeksiranje dokumenata umjesto običnog alata za rađenje HTTP zahtjeva koristi specijalizirana Java biblioteka koja to ``pojednostavljuje''. Također, Solr ima 2 različite dokumentacije\footnote{\url{https://cwiki.apache.org/confluence/display/solr/Apache+Solr+Reference+Guide} i \url{https://wiki.apache.org/solr/}}, koje opisuju iste komponente, te nije jasno koju bi trebalo čitati.
+
+\begin{figure}[H]
+  \centering
+  \fbox{\parbox{\textwidth}{
+    \texttt{POST /admin/collections?action=CREATE\&name=movies}
+
+    \smallskip
+
+    \texttt{POST /movies/schema}
+
+    \smallskip
+
+    \texttt{GET  /select}
+  }}
+  \caption{Nedosljednost Solr-ovih URL-ova}
+  \label{solr-urls}
+\end{figure}
+
+Solr se konfigurira direktnim ažuriranjem konfiguracijskih datoteki koje se nalaze u instalacijskom direktoriju, i nije moguće to raditi preko HTTP API-a. To otežava automatizaciju konfiguracije, jer je teško napisati program koji će ažurirati konfiguraciju. Također, Solr za konfiguraciju koristi zastarjeli format XML (vidi sliku \ref{solr-xml}), koji se teže čita od današnjeg standarda, JSON-a.
+
+\begin{figure}[H]
+  \centering
+  \begin{lstlisting}[language=XML, frame=single]
+<?xml version="1.0" encoding="UTF-8" ?>
+<config>
+  <luceneMatchVersion>5.0.0</luceneMatchVersion>
+  <codecFactory class="solr.SchemaCodecFactory"/>
+  <schemaFactory class="ClassicIndexSchemaFactory"/>
+  <requestHandler name="/query" class="solr.SearchHandler">
+     <lst name="defaults">
+       <str name="echoParams">explicit</str>
+       <str name="wt">json</str>
+       <str name="indent">true</str>
+       <str name="df">text</str>
+     </lst>
+  </requestHandler>
+</config>
+  \end{lstlisting}
+  \caption{Konfiguracija Solra s XML-om}
+  \label{solr-xml}
+\end{figure}
 
 Solr nema podršku za rangiranje po blizini riječi.
 
@@ -540,19 +614,67 @@ Neke od poznatijih organizacija koje koriste Sphinx su Tumblr i CouchSurfing (uz
 
 \subsubsection{Prednosti}
 
-Sphinx ima nativnu integraciju sa svim poznatim SQL bazama (PostgreSQL, MySQL, Microsoft SQL, Oracle itd.), što ga automatski čini iskoristivim za većinu aplikacija. Sve što je potrebno da bi se podaci sinkronizirali je poslati Sphinxu komandu da indeksira, i on će dograbiti podatke iz SQL baze i staviti u svoj indeks. Sphinx ima više vrsta indeksa, i jedna vrsta je \textit{indeks u realnom vremenu}, koja eliminira potrebu eksplicitnog osvježavanja indeksa jer se oni sami mogu osvježavati (\cite{sphinx} \textit{Real-Time Indices}).
+Sphinx ima nativnu integraciju sa svim poznatim SQL bazama (PostgreSQL, MySQL, Microsoft SQL, Oracle itd.), što ga automatski čini iskoristivim za većinu aplikacija. Sve što je potrebno da bi se podaci sinkronizirali je poslati Sphinxu komandu da indeksira (slika \ref{sphinx-indexing}), i on će dograbiti podatke iz SQL baze i staviti u svoj indeks. Sphinx ima više vrsta indeksa, i jedna vrsta je \textit{indeks u realnom vremenu}, koja eliminira potrebu eksplicitnog osvježavanja indeksa jer se oni sami mogu osvježavati (\cite{sphinx} \textit{Real-Time Indices}).
+
+\begin{figure}[H]
+  \centering
+  \fbox{\texttt{\$ indexer -{}-all -{}-rotate}}
+  \caption{Sphinxova komanda u komandnoj liniji za indeksiranje}
+  \label{sphinx-indexing}
+\end{figure}
 
 Osim standardnih vrsta upita, Sphinx podržava i vrlo napredne vrste. Primjerice, upit ``\textit{pećina SENTENCE medvjed}'' će pronaći sve dokumente u kojima se riječ \textit{pećina} i \textit{medvjed} pojavljuju u istoj rečenici. Slično, upit ``\textit{jabuke PARAGRAPH voćnjak}'' će pronaći sve dokumente u kojima se riječ \textit{jabuka} nalazi u istom paragrafu kao riječ \textit{voćnjak}. Još jedan koristan operator je "MAYBE", koji funckionira kao nekomutativni oblik "OR" operatora; upit ``\textit{jabuka MAYBE kruška}'' neće vratiti dokumente u kojima se pojavljuje riječ \textit{kruška}, a ne pojavljuje se riječ \textit{jabuka}. Zbog Sphinxove napredne sintakse upita potrebno je vrlo malo prevođenja korisničkog upita u domenu Sphinxa (\cite{sphinx} \textit{Extended query syntax}).
 
-Sphinx omogućuje definiranje svojih funkcija rangiranja, koje mogu biti kompozicije postojećih (TF-IDF, blizina riječi itd.).
+Sphinx omogućuje definiranje svojih funkcija rangiranja, koje mogu biti kompozicije postojećih (TF-IDF, blizina riječi itd, vidi sliku \ref{sphinx-ranking}).
+
+\begin{figure}[H]
+  \begin{Verbatim}[frame=single]
+SELECT * FROM movies WHERE MATCH('future')
+OPTION ranker = expr('tf_idf*10 + word_count/2 + user_weight');
+  \end{Verbatim}
+  \caption{Kombiniranje metoda za rangiranje u Sphinxu}
+  \label{sphinx-ranking}
+\end{figure}
 
 \subsubsection{Nedostaci}
 
-Sphinx jer potrebno dosta precizno konfigurirati da bi radio dobro. Na primjer, bez inicijalne konfiguracije Sphinx će pri pretraživanju dokumenata učitati cijelu SQL tablicu u memoriju. Doduše, Sphinx ima upute za zaobilaženje tog problema, ali moraju se eksplicitno unijeti u konfiguraciju, što nije prijateljski prema novim korisnicima.
+Sphinx jer potrebno dosta precizno konfigurirati da bi radio dobro (slika \ref{sphinx-configuration}). Na primjer, bez određene inicijalne konfiguracije Sphinx će pri pretraživanju dokumenata učitati cijelu SQL tablicu u memoriju. Doduše, Sphinx ima upute za zaobilaženje tog problema, ali moraju se eksplicitno unijeti u konfiguraciju, što nije prijateljski prema novim korisnicima.
+
+\begin{figure}[H]
+  \begin{Verbatim}[frame=single]
+searchd {
+  listen = 127.0.0.1:9306:mysql41
+  log = tmp/searchd.log
+  query_log = tmp/searchd.query.log
+  pid_file = tmp/sphinx.pid
+  workers = threads
+}
+
+source movies {
+  type = mysql
+  sql_host = 127.0.0.1
+  sql_user = root
+  sql_pass = 
+  sql_db = diploma
+  sql_port = 3306
+  sql_query_range = SELECT MIN(id),MAX(id) FROM documents
+  sql_range_step = 1000
+  sql_query = SELECT * FROM movies WHERE id>=$start AND id<=$end
+  sql_attr_uint = year
+}
+
+index movies {
+  path = /usr/local/var/data/index
+  source = movies
+}
+  \end{Verbatim}
+  \caption{Potrebna konfiguracija Sphinxa}
+  \label{sphinx-configuration}
+\end{figure}
 
 U Sphinxu ima dva načina indeksiranja, od kojih se svaki konfigurira na drugi način. Prvi način indeksiranja bez konfiguracije zahtijeva da se uvijek iznova indeksiraju svi podaci. To može biti sporo, pa su uvedeni tzv. \textit{delta} indeksi, koji omogućavaju indeksiranje samo dijela dokumenata koji su ažurirani. Međutim, ta postavka se mora konfigurirati na vrlo niskoj razini, a delta indeksi se još moraju ručno spajati s glavnim indeksom, što je sveukupno dosta komplicirano. Zato je Sphinx uveo drugi način indeksiranja, tzv. \textit{indeksi u realnom vremenu}. Međutim, ja nisam uspio postići da rade.
 
-Sphinx nije baš fleksibilan što se tiče podataka koje indeksira. Kada se ažuriraju stupci u nekoj tablici, najčešće je potrebno ažurirati i polja unutar konfiguracije. To komplicira održavanje i često može rezultirati nenadanim greškama.
+Sphinx nije baš fleksibilan što se tiče podataka koje indeksira. Kada se ažuriraju stupci u nekoj tablici, najčešće je potrebno ažurirati i odgovarajuće deklaracije polja unutar konfiguracije. To komplicira održavanje i često može rezultirati nenadanim greškama.
 
 Sphinx nema podršku za ispravljanje zatipaka i normalizaciju dijakritičkih znakova.
 
@@ -572,13 +694,51 @@ Postgres se odlikuje po naprednoj tokenizaciji. Osim standardnih vrsta tokena (r
 
 Glavni nedostatak Postgresa je što, u usporedbi s ostalim tražilicama punog teksta, daje funkcionalnost na puno nižoj razini. Velik broj osnovnih tipova upita i funkcionalnosti je teško prevesti u domenu Postgresa.
 
-Primerice, Postgres ne prepoznaje booleove upite kakve bi ih korisnik napisao; on zahtijeva da između svake riječi postoji operator. Nema ni direktnu podršku za fraze, nego fraze treba ekstrahirati iz upita i staviti u dodatan SQL upit. Nadalje, Postgres ima funkciju za sličnost dviju riječi, ali ju je nemoguće iskoristiti za ispravljanje zatipaka, osim kada je upit jedna riječ (\cite{goodenough}). Također, Postgres nema podršku za TF-IDF metodu rangiranja.
+Primerice, Postgres ne prepoznaje booleove upite kakve bi ih korisnik napisao; on zahtijeva da između svake riječi postoji operator. Nema ni direktnu podršku za fraze, nego fraze treba ekstrahirati iz upita i staviti u dodatan SQL upit (slika \ref{postgres-phrases}). Nadalje, Postgres ima funkciju za sličnost dviju riječi, ali ju je nemoguće iskoristiti za ispravljanje zatipaka, osim kada je upit jedna riječ (\cite{goodenough}). Također, Postgres nema podršku za TF-IDF metodu rangiranja.
+
+\begin{figure}[H]
+  \begin{Verbatim}[frame=single]
+SELECT * FROM movies WHERE content @@ 'future'
+AND plot ILIKE '%time travel%';
+  \end{Verbatim}
+  \caption{Imitiranje fraznog pretraživanja u Postgresu}
+  \label{postgres-phrases}
+\end{figure}
 
 Pretraživanje kroz više tablica (preko stranih ključeva) se u Postgresu ne može indeksirati. Jedan način kako se to može zaobići je indeksiranjem i pretraživanjem svake tablice posebno, te spajanjem rezultata pomoću stranih ključeva. Međutim, tada je vrlo teško izračunati sveukupnu relevantnost glavnog dokumenta. Drugi način kako se to može zaobići jest denormalizacijom baze. Međutim, to narušava dizajn baze podataka i otežava čuvanje integriteta i generalno održavanje.
 
-Postgres ne podržava normalizaciju dijakritičkih znakova u kombinaciji s korjenovanjem, kada se koristi jezik kojemu su dijakritički znakovi dio gramatike (npr. hrvatski). To je zato što se zbog tehničkih nedostataka normalizacija dijakritičkih znakova može izvršiti jedino prije korjenovanja. To znači da će sve riječi u trenutku korjenovanja biti bez dijakritičkih znakova, pa rječnik korišten za korjenovanje neće velik broj riječi uopće prepoznati kao hrvatske te ih neće korjenovati. Čak i da nema ovog nedostatka, normalizacija dijakritičkih znakova se nativno ne može indeksirati, što tu značajku čini neupotrebljivom.
+Postgres ne podržava normalizaciju dijakritičkih znakova u kombinaciji s korjenovanjem, kada se koristi jezik kojemu su dijakritički znakovi dio gramatike (npr. hrvatski). To je zato što se zbog tehničkih nedostataka normalizacija dijakritičkih znakova može izvršiti jedino prije korjenovanja. I tada bi sve riječi u trenutku korjenovanja bile bez dijakritičkih znakova, pa rječnik korišten za korjenovanje ne bi velik broj riječi uopće mogao prepoznati kao hrvatske te ih ne bi korjenovao. Čak i da nema ovog nedostatka, normalizacija dijakritičkih znakova se nativno ne može indeksirati, jer ju Postgres nije odgovarajuću funkciju \texttt{unaccent()} označio kao IMMUTABLE, što tu značajku čini neupotrebljivom (slika \ref{postgres-unaccent}).
 
-Općenito je u Postgresu vrlo teško pravilno indeksirati podatke za pretraživanje punog teksta. Potrebno je raditi funkcije u PL/pgSQL-u (posebni programski jezik za Postgres) da se spremi obrađeni tekst u posebni stupac, kojih treba biti više ako će biti više načina pretraživanja, i ti stupci se onda trebaju ažurirati kada se podaci promijene pomoću okidača (eng. \textit{trigger}), koje ponovno treba napisati u PL/pgSQL-u.
+\begin{figure}[H]
+  \begin{Verbatim}[frame=single]
+CREATE INDEX movies_index ON movies USING gin(unaccent(title));
+# ERROR: functions in index expression must be marked IMMUTABLE
+  \end{Verbatim}
+  \caption{Nemogućnost indeksiranja normalizacije dijakritika u Postgresu}
+  \label{postgres-unaccent}
+\end{figure}
+
+Općenito je u Postgresu vrlo teško pravilno indeksirati podatke za pretraživanje punog teksta. Potrebno je raditi funkcije u PL/pgSQL-u (posebni programski jezik za Postgres) da se spremi obrađeni tekst u posebni stupac, kojih treba biti više ako će biti više načina pretraživanja, i ti stupci se onda trebaju ažurirati kada se podaci promijene pomoću okidača (slika \ref{postgres-indexing}).
+
+\begin{figure}[H]
+  \begin{Verbatim}[frame=single]
+CREATE FUNCTION movies_trigger() RETURNS trigger AS $$
+begin
+  new.content :=
+     setweight(to_tsvector(coalesce(new.title,'')),      'A') ||
+     setweight(to_tsvector(coalesce(new.year::text,'')), 'A') ||
+     setweight(to_tsvector(coalesce(new.plot,'')),       'C') ||
+     setweight(to_tsvector(coalesce(new.episode,'')),    'C');
+  return new;
+end
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER movies_tsv BEFORE INSERT OR UPDATE
+ON movies FOR EACH ROW EXECUTE PROCEDURE movies_trigger();
+  \end{Verbatim}
+  \caption{Pravilno automatsko indeksiranje punog teksta u Postgresu}
+  \label{postgres-indexing}
+\end{figure}
 
 \subsection{Elasticsearch}
 
@@ -613,9 +773,35 @@ Za razliku od većine tražilica punog teskta, Elasticsearch sam upravlja replik
 
 Elasticsearch također ima ugrađenu podršku za kontrolu paralelnih zahtjeva. Općenito, kada dva korisnika žele ažurirati isti dokument u isto vrijeme, može se dogoditi da promjene jednog korisnika prebrišu promjene drugog. Elasticsearch to rješava tzv. optimističnim zaključavanjem, koje se sastoji od toga da svaki dokument ima svoju verziju (koja se inkrementira pri svakom ažuriranju). Tada aplikacija može spriječiti korisnika da ažurira jednu verziju dokumenta ako se u međuvremenu dokument ažuririrao i dobio drugu verziju (\cite{elasticguide} \textit{Data In, Data Out}).
 
-Elasticsearch ima dio API-a koji pruža veliku razinu introspekcije u sveukupno funkcioniranje sustava. Instalacija Elasticsearcha također dolazi i sa web aplikacijom koja vizualno prikazuje to stanje s grafovima, i koja koristi taj API.
+Elasticsearch ima dio API-a koji pruža veliku razinu introspekcije u sveukupno funkcioniranje sustava. Instalacija Elasticsearcha također dolazi i sa web aplikacijom koja vizualno prikazuje to stanje s grafovima, i koja koristi taj API (slika \ref{elastic-monitoring}).
 
-Elasticsearch nativno podržava složene upite (booleovi operatori, fraze, specificiranje polja itd.), te nije potrebno posebno prevoditi dolazeće upite. Osim složenih upita, Elasticsearch podržava i jednostavne upite koji se mogu međusobno kombinirati. Tako je, na primjer, moguće izvršiti neku vrstu upita te mu dodati upit koji nalazi slične dokumente. Tada će rezultati biti kombinacija ta dva upita, danim redoslijedom (\cite{elasticref} \textit{Search APIs}). Elasticsearch također nativno podržava preprocesiranje tekstualnih datoteki, koristeći Apache Tika.
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=\textwidth]{elastic-monitoring}
+  \caption{Aplikacija za nadgledanje Elasticsearcha}
+  \label{elastic-monitoring}
+\end{figure}
+
+Elasticsearch nativno podržava složene upite (booleovi operatori, fraze, specificiranje polja itd.), te nije potrebno posebno prevoditi dolazeće upite. Osim složenih upita, Elasticsearch podržava i jednostavne upite koji se mogu međusobno kombinirati (slika \ref{elastic-query}). Tako je, na primjer, moguće izvršiti neku vrstu upita te mu dodati upit koji nalazi slične dokumente. Tada će rezultati biti kombinacija ta dva upita, danim redoslijedom (\cite{elasticref} \textit{Search APIs}). Elasticsearch također nativno podržava preprocesiranje tekstualnih datoteki, koristeći Apache Tika.
+
+\begin{figure}[H]
+  \centering
+  \begin{Verbatim}[frame=single]
+"query": {
+  "query_string": {
+    "query": "back to the future",
+    "default_operator": "AND"
+  },
+  "boosting": {
+    "positive": {
+      "term": {"_all": "time travel"}
+    }
+  }
+}
+  \end{Verbatim}
+  \caption{Kombiniranje vrsta upita u Elasticsearchu}
+  \label{elastic-query}
+\end{figure}
 
 Elasticsearch ima nativno podržanu funkcionalnost automatskog nadopunjavanja, koje je vrlo konfigurabilno i brzo. Također ima i mogućnost ispravljanja zatipaka, na puno različitih načina. Moguće je uz normalan upit automatski napraviti i \textit{fuzzy} upit, a može se i ponuditi ispravljeni upit koji pruža \textit{did you mean} iskustvo.
 
@@ -665,29 +851,29 @@ Elasticsearch kao dokumentno-orijentirane baza podataka sadrži vrlo napredne vr
 
 \begin{thebibliography}{99}
   \bibitem{taming} G. S. Ingersoll, T. S. Morton, A. L. Farris, \textit{Taming Text: How to Find, Organize, and Manipulate It}, Manning Publications Co, New York, 2013.
-  \bibitem{lucene} \url{http://lucene.apache.org/core/4_10_3/} (travanj, 2015)
-  \bibitem{solr} \url{http://ftp.carnet.hr/misc/apache/lucene/solr/ref-guide/apache-solr-ref-guide-5.0.pdf} (travanj, 2015)
-  \bibitem{sphinx} \url{http://sphinxsearch.com/docs/latest/index.html} (travanj, 2015)
-  \bibitem{postgres} \url{http://www.postgresql.org/docs/9.4/static/index.html} (travanj, 2015)
-  \bibitem{elasticguide} C. Gormley, Z. Tong, dostupno na \url{http://www.elastic.co/guide/en/elasticsearch/guide/current/index.html} (travanj, 2015)
-  \bibitem{elasticref} C. Gormley, Z. Tong, dostupno na \url{http://www.elastic.co/guide/en/elasticsearch/reference/current/index.html} (travanj, 2015)
-  \bibitem{metaphone} \url{http://en.wikipedia.org/wiki/Metaphone} (travanj, 2015)
-  \bibitem{fuzzy} \url{https://www.found.no/foundation/fuzzy-search/} (travanj, 2015)
-  \bibitem{damerau} \url{http://en.wikipedia.org/wiki/Damerau-Levenshtein_distance} (travanj, 2015)
-  \bibitem{goodenough} \url{http://blog.lostpropertyhq.com/postgres-full-text-search-is-good-enough/} (travanj, 2015)
-  \bibitem{google} \url{https://www.google.com/work/search/products/gss.html} (travanj, 2015)
+  \bibitem{lucene} \textit{Apache Lucene™ 5.0.0 Documentation}, \url{http://lucene.apache.org/core/5_0_0/index.html} (travanj, 2015)
+  \bibitem{solr} \textit{Apache Solr Reference Guide}, \url{http://ftp.carnet.hr/misc/apache/lucene/solr/ref-guide/apache-solr-ref-guide-5.0.pdf} (travanj, 2015)
+  \bibitem{sphinx} \textit{Sphinx 2.2.6-release reference manual}, \url{http://sphinxsearch.com/docs/archives/2.2.6/} (travanj, 2015)
+  \bibitem{postgres} \textit{PostgreSQL 9.4.1 Documentation}, \url{http://www.postgresql.org/docs/9.4/static/index.html} (travanj, 2015)
+  \bibitem{elasticguide} C. Gormley, Z. Tong, \textit{Elasticsearch - The Definitive Guide}, \url{http://www.elastic.co/guide/en/elasticsearch/guide/current/index.html} (travanj, 2015)
+  \bibitem{elasticref} C. Gormley, Z. Tong, \textit{Elasticsearch reference – 1.5}, \url{http://www.elastic.co/guide/en/elasticsearch/reference/1.5/index.html} (travanj, 2015)
+  \bibitem{metaphone} \textit{Metaphone}, \url{http://en.wikipedia.org/wiki/Metaphone} (travanj, 2015)
+  \bibitem{fuzzy} A. Cholakian, \textit{How to Use Fuzzy Searches in Elasticsearch}, \url{https://www.found.no/foundation/fuzzy-search/} (travanj, 2015)
+  \bibitem{damerau} \textit{Damerau–Levenshtein distance}, \url{http://en.wikipedia.org/wiki/Damerau-Levenshtein_distance} (travanj, 2015)
+  \bibitem{goodenough} R. Belaid, \textit{Postgres full-text search is Good Enough!}, \url{http://blog.lostpropertyhq.com/postgres-full-text-search-is-good-enough/} (travanj, 2015)
+  \bibitem{google} \textit{Google Site Search}, \url{https://www.google.com/work/search/products/gss.html} (travanj, 2015)
 \end{thebibliography}
 
 \pagestyle{empty}
 
 \begin{sazetak}
-  Zbog sve većeg rasta digitalnih informacija, potrebne su napredne tehnike pretraživanja velikih količina teksta. Tradicionalno su relacijske baze podataka obavljale posao pretraživanja informacija, ali one su dobre samo za strukturirano i diskretno pretraživanje. Pretraživanje punog teksta zahtijeva tehnike napredne obrade teksta, kako bi se mogao dati odgovor na pitanje \textit{koliko} dani upit odgovara nekom dokumentu.
+  Zbog sve većeg rasta digitalnih informacija, potrebne su napredne metode pretraživanja velikih količina teksta. Tradicionalno su relacijske baze podataka obavljale posao pretraživanja informacija, ali one su dobre samo za strukturirano i diskretno pretraživanje. Pretraživanje punog teksta zahtijeva napredne tehnike obrade teksta, kako bi se mogao dati odgovor na pitanje \textit{koliko} dani upit odgovara nekom dokumentu.
 
-  Pretraživanje punog teksta zahtijeva da se tekst informacija unaprijed obradi, kako bi se moglo omogućiti što brže izvršavanje upita. Tako se tekst najprije rastavlja na rečenice, a rečenice na tokene, što svodi pretraživanje teksta na pretraživanje liste tokena. Zatim se tim tokenima sva slova pretvore u mala i normaliziraju se dijakritički znakovi, što pojednostavljuje potrebne znakove za upit. Nakon toga se eliminiraju sve stop-riječi (riječi koje ne donose semantičko značenje) te se sve riječi korjeniziraju, što omogućava da riječ iz upita pronađe sve dokumente koji sadrže bilo koju varijaciju te riječi (npr. po brojnosti i padežu). Zatim se ta obrađena lista tokena sprema u strukturu koja se zove \textit{indeks}, i koja se koristi pri kasnijim upitima.
+  Pretraživanje punog teksta zahtijeva da se tekst informacija unaprijed obradi, kako bi se moglo omogućiti što brže izvršavanje upita. Tako se tekst najprije rastavlja na rečenice, a rečenice na tokene, što svodi pretraživanje teksta na pretraživanje liste tokena. Zatim se tim tokenima sva slova pretvore u mala i normaliziraju se dijakritički znakovi, što pojednostavljuje potrebne znakove za upit. Nakon toga se eliminiraju sve stop-riječi (riječi koje ne donose semantičko značenje) te se sve riječi korjeniziraju, što omogućava da riječ iz upita pronađe sve dokumente koji sadrže bilo koju varijaciju te riječi (npr. po brojnosti i padežu). Zatim se ta obrađena lista tokena sprema u strukturu koja se zove \textit{indeks}, i koja se koristi pri pretraživanju.
 
   Nakon indeksiranja moguće je raditi upite na stvoreni indeks. Sam tekst upita najprije prolazi kroz istu transformaciju kao i indeks, s time da se još svaka riječ proširuje njenim sinonimima, da bi se pronašao što veći broj relevantnih dokumenata. Zatim se tekst upita analizira za potencijalne fraze (niz riječi unutar dvostrukih navodnika), booleove operatore, zamjenske znakove i regularne izraze. U upit je moguće uključiti i strukturirano pretraživanje specificiranjem polja. Za vrijeme upisivanja upita, korisno je korisniku ponuditi prozor koji automatski predviđa više nastavaka njegovog upita. Za vrijeme izršavanja upita je dobro i tolerirati neke eventualne zatipke.
 
-  Konačno budući da kod ovakvih pretraživanja često velik broj dokumenata odgovara upitu, potrebno je rangirati dokumente po relevantnosti, na koju se može utjecati na mnogo načina. Osim automatske relevantnosti temeljene na broju pojavljivanja ključnih riječi u dokumentu, moguće je odrediti da su neka polja dokumenta važnija od drugih (npr. naslov), pa rangirati upit koji je pronađen u naslovu više od onog koji je pronađen u tijelu dokumenta. Također je dobro rangirati i dokumente po redoslijedu i međusobnoj blizini riječi iz upita.
+  Konačno, budući da kod ovakvih pretraživanja često velik broj dokumenata odgovara upitu, potrebno je rangirati dokumente po relevantnosti, na koju se može utjecati na mnogo načina. Osim automatske relevantnosti temeljene na broju pojavljivanja ključnih riječi u dokumentu, moguće je odrediti da su neka polja dokumenta važnija od drugih (npr. naslov), pa rangirati upit koji je pronađen u naslovu više. Također je dobro rangirati i dokumente po redoslijedu i međusobnoj blizini riječi iz upita.
 
   Dugo vremena su se za pretraživanje unutar web stranica koristile komercijalne tražilice poput Googlea. Međutim, kroz zadnjih 5 godina razvio se velik broj tražilica punog teksta otvorenog kôda. Najpoznatije su Apache Solr, Sphinx, PostgreSQL (koji je dobio podršku za pretraživanje punog teksta) i Elasticsearch. Kroz testiranje i analizu značajki pokazalo se da je među njima prevladao Elasticsearch.
 
@@ -695,10 +881,23 @@ Elasticsearch kao dokumentno-orijentirane baza podataka sadrži vrlo napredne vr
 \end{sazetak}
 
 \begin{summary}
+  Because of increasing growth of digital information, advanced methods of searching large amounts of text are required. Traditionally relational databases were doing the job of searching information, but they are good only for structured and discrete searching. Full-text search requires advanced methods of text processing, so that the question \textit{how much} the given query matches a document can be answered.
+
+  Full-text search requires that the text is processed upfront, so that maximum query execution speed can be achieved. The text is first split into sentences, then each sentence is tokenized, which enables searching text to become searching a list of tokens. Afterwards all tokens are downcased and have their diacritics normalized, which simplifies the character set needed for queries. Then stopwords (words that don't bring additional meaning) are removed from the token list and stemming is applied for each token, which enables a keyword in the query to find all documents with any variation of that keyword (e.g. plural or singular). Finally the processed list of tokens are saved in a structure called \textit{the index}, which is then used for searching.
+
+  After indexing it is possible to query the created index. The text of the query alone is first processed in the same way as the index, with an addition that each token is also expanded with its synonyms, to increase the number of relevant documents returned. At query time the text of the query is analyzed for phrases (sequence of words inside double quotes), boolean operators, wildcards and regular expressions. It's possible to also include structured search in the query. When a user is typing the query, it can be useful to try to autocomplete the query in a box below. At query execution time it's also good to tolerate possible typos.
+
+  Finally, since this kind of searching usually yields many results, it's necessary to rank the documents by relevancy, which can be affected in many ways. Besides automatic relevancy based on the number of appearances of keywords in the document, it's possible to specify that some fields are more important than others (e.g. title), and rank the query which is found in the title higher. Also, it's good to rank documents by order and distance between keywords from the query.
+
+  For a long time web pages had search powered by commercial search engines like Google. However, during that past 5 years a great number of open source full-text search engines have evolved. The most popular ones are Apache Solr, Sphinx, PostgreSQL (which received support for full-text search) and Elasticsearch. Through testing and analysis of features it was concluded that Elasticsearch prevailed.
+
+  Big number of people are using quality search engines like Google in everyday life, and it becomes a mission of web applications to try to bring the quality of their search as close as possible to that standard.
 \end{summary}
 
 \begin{cv}
   Rođen sam 10. ožujka 1991. godine u Zagrebu. Nakon završetka Waldorfske škole u Zagrebu upisao sam se u XV. gimnaziju isto u Zagrebu. Maturirao sam 2009. godine te sam odmah upisao preddiplomski studij matematike, inženjerski smjer, na Matematičkom odjseku Prirodoslovno-Matematičkog fakulteta u Zagrebu. 2012. godine stekao sam titulu prvostupnika matematike, nakon čega sam upisao diplomski studij Računarstva i matematike na istom fakultetu.
+
+  Za vrijeme preddiplomskog studija razvio sam veliko zanimanje za programiranje kroz programski jezik Ruby, čime se intenzivno bavim izvan fakulteta, a najviše me zanima izrada web aplikacija.
 \end{cv}
 
 \end{document}
